@@ -6,8 +6,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class ShopWellBackendApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ShopWellBackendApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(ShopWellBackendApplication.class, args);
+    }
 
 }
