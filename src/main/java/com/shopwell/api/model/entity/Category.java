@@ -1,15 +1,16 @@
 package com.shopwell.api.model.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Entity
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Category {
@@ -17,9 +18,15 @@ public class Category {
     @GeneratedValue(
             strategy = GenerationType.IDENTITY
     )
+    @Column(name = "column_id")
     private Long categoryId;
 
+    @Column(name = "category_name")
     private String categoryName;
 
+    @Column(name = "category_desc")
     private String categoryDescription;
+
+    @OneToMany(mappedBy = "category", fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<Product> products;
 }

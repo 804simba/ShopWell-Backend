@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Entity
 @Table(name = "vendors")
 @Data
@@ -34,4 +36,7 @@ public class Vendor {
     private String vendorEmailAddress;
 
     private String vendorWebsiteAddress;
+
+    @OneToMany(fetch = FetchType.LAZY)
+    private List<Product> vendorProducts;
 }
