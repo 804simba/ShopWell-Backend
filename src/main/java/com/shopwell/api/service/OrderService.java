@@ -15,7 +15,7 @@ public interface OrderService {
 
     String cancelOrder(Long orderId);
 
-    List<OrderResponseVO> getCustomerOrders(Long customerId);
+    List<OrderResponseVO> getCustomerOrders(Long customerId) throws CustomerNotFoundException;
 
-    void updateOrderStatus(Long orderId, OrderStatus status);
+    String updateOrderStatus(Long orderId, OrderStatus status);
 }
