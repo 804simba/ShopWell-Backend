@@ -17,6 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @Table(
         name = "customers",
+        indexes = @Index(name = "customer_email_idx", columnList = "customer_email"),
         uniqueConstraints = {
                 @UniqueConstraint(name = "emailId_unique", columnNames = "customer_email"),
                 @UniqueConstraint(name = "guardianMobile_unique", columnNames = "customer_phone_number")

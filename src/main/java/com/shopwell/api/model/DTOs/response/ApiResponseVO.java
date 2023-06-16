@@ -7,8 +7,11 @@ import lombok.Data;
 @Data
 @Builder
 @AllArgsConstructor
-public class ApiResponse<T> {
+public class ApiResponseVO<T> {
+
     private String message;
+
     private String error;
+
     private T payload;
 }

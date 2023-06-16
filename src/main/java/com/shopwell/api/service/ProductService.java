@@ -1,19 +1,30 @@
 package com.shopwell.api.service;
 
 import com.shopwell.api.exceptions.ProductNotFoundException;
+import com.shopwell.api.model.DTOs.request.OrderRequestVO;
 import com.shopwell.api.model.DTOs.request.ProductRegistrationVO;
-import com.shopwell.api.model.DTOs.response.ApiResponse;
+import com.shopwell.api.model.DTOs.response.ApiResponseVO;
+import com.shopwell.api.model.entity.CartItem;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface ProductService {
-    ApiResponse<?> saveProduct(ProductRegistrationVO productRegistrationVO);
+    ApiResponseVO<?> saveProduct(ProductRegistrationVO productRegistrationVO);
 
-    ApiResponse<?> editProduct(Long id, ProductRegistrationVO productRegistrationVO) throws ProductNotFoundException;
+    ApiResponseVO<?> editProduct(Long id, ProductRegistrationVO productRegistrationVO) throws ProductNotFoundException;
 
-    ApiResponse<?> getProduct(Long id) throws ProductNotFoundException;
+    ApiResponseVO<?> getProduct(Long id) throws ProductNotFoundException;
 
-    ApiResponse<List<ProductRegistrationVO>> searchProducts(String keyword);
+    ApiResponseVO<List<ProductRegistrationVO>> searchProducts(String keyword);
 
-    ApiResponse<?> deleteProduct(Long id);
+    ApiResponseVO<?> deleteProduct(Long id);
+
+    String addProductToCart(Long productId, Long customerId);
+
+    String removeProductFromCart(Long productId, Long customerId);
+
+    List<CartItem> getCartItems(Long customerId);
+
+    BigDecimal calculateTotalPrice(Long customerId);
 }
