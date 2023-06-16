@@ -3,6 +3,7 @@ package com.shopwell.api.model.entity;
 import com.shopwell.api.model.enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,6 +15,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Order {
     @Id
     @GeneratedValue(
@@ -33,6 +35,12 @@ public class Order {
     @Column(name = "order_total")
     private BigDecimal orderTotal;
 
+    @Column(name = "shipping_method")
+    private String shippingAddress;
+
+    @Column(name = "payment_method")
+    private String paymentMethod;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "order_status")
     private OrderStatus orderStatus;
@@ -44,4 +52,7 @@ public class Order {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "employee_id", referencedColumnName = "employeeId")
     private Employee employee;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItem> orderItems;
 }
