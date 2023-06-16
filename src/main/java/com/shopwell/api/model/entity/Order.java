@@ -18,14 +18,18 @@ public class Order {
     @GeneratedValue(
             strategy = GenerationType.IDENTITY
     )
+    @Column(name = "order_id")
     private Long orderId;
 
     @Temporal(TemporalType.DATE)
+    @Column(name = "order_date")
     private Timestamp orderDate;
 
     @Temporal(TemporalType.DATE)
+    @Column(name = "order_ship_date")
     private Timestamp shipDate;
 
+    @Column(name = "order_total")
     private BigDecimal orderTotal;
 
     @ManyToOne(fetch = FetchType.LAZY)
