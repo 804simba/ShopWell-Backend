@@ -18,6 +18,8 @@ public class OrderResponseVO {
 
     private Long customerId;
 
+    private String orderDate;
+
     private List<OrderItemVO> orderItems;
 
     private String orderStatus;
