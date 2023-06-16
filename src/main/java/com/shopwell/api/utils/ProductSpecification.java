@@ -7,14 +7,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProductSpecification {
     public static Specification<Product> hasBrand(String brand) {
-
+        return null;
     }
 
     public static Specification<Product> hasName(String name) {
-
+        return null;
     }
 
     public static Specification<Product> hasPrice(Long price) {
-
+        return null;
     }
 }

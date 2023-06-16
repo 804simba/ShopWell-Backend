@@ -16,13 +16,16 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductVendor implements Serializable {
-    @Id
+    @EmbeddedId
+    private ProductVendorKey productVendorId;
+
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("productId")
     @JoinColumn(name = "product_id", referencedColumnName = "productId")
     private Product product;
 
-    @Id
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("vendorId")
     @JoinColumn(name = "vendor_id", referencedColumnName = "vendorId")
     private Vendor vendor;
 

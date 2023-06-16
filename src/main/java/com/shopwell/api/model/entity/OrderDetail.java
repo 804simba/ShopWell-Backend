@@ -25,7 +25,9 @@ public class OrderDetail {
     @JoinColumn(name = "product_id", referencedColumnName = "product_id")
     private Long productNumber;
 
+    @Column(name = "quoted_price")
     private BigDecimal quotedPrice;
 
+    @Column(name = "quantity_ordered")
     private Integer quantityOrdered;
 }
