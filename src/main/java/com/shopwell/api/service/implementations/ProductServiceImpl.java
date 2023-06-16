@@ -1,13 +1,14 @@
 package com.shopwell.api.service.implementations;
 
 import com.shopwell.api.exceptions.ProductNotFoundException;
+import com.shopwell.api.model.DTOs.request.CartItemVO;
 import com.shopwell.api.model.DTOs.request.ProductRegistrationVO;
 import com.shopwell.api.model.DTOs.response.ApiResponseVO;
 import com.shopwell.api.model.entity.Brand;
-import com.shopwell.api.model.entity.CartItem;
 import com.shopwell.api.model.entity.Product;
 import com.shopwell.api.repository.BrandRepository;
 import com.shopwell.api.repository.ProductRepository;
+import com.shopwell.api.service.CartService;
 import com.shopwell.api.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,8 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
 
     private final BrandRepository brandRepository;
+
+    private final CartService cartService;
 
     @Override
     public ApiResponseVO<?> saveProduct(ProductRegistrationVO productRegistrationVO) {
@@ -83,23 +86,31 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public String addProductToCart(Long productId, Long customerId) {
-        return null;
+    public String addProductToCart(Long productId, Long customerId, int quantity) {
+        Product foundProduct = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        cartService.addProductToCart(foundProduct, customerId, quantity);
+        return "Product added to cart successfully.";
     }
 
     @Override
     public String removeProductFromCart(Long productId, Long customerId) {
-        return null;
+        Product foundProduct = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        cartService.removeProductFromCart(foundProduct, customerId);
+        return "Product removed from cart successfully";
     }
 
     @Override
-    public List<CartItem> getCartItems(Long customerId) {
-        return null;
+    public List<CartItemVO> getCartItems(Long customerId) {
+        return cartService.getCartItems(customerId);
     }
 
     @Override
     public BigDecimal calculateTotalPrice(Long customerId) {
-        return null;
+        return cartService.calculateTotalPrice(customerId);
     }
 
     private Product toProductEntity(ProductRegistrationVO productRegistrationVO) {
