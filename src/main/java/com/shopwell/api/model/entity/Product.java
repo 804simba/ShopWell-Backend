@@ -3,6 +3,7 @@ package com.shopwell.api.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
@@ -28,7 +29,7 @@ public class Product {
     private String productDescription;
 
     @Column(name = "product_price")
-    private Long productPrice;
+    private BigDecimal productPrice;
 
     @Column(name = "quantity")
     private Integer quantityAvailable;
