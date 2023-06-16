@@ -60,23 +60,49 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<OrderResponseVO> getOrderDetails(Long orderId) {
-
-        return null;
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Failed place order"));
+        return order.getOrderItems().stream()
+                .map(orderItem -> OrderResponseVO.builder()
+                        .orderId(orderItem.getId())
+                        .orderDate(order.getOrderDate().toString())
+                        .orderStatus(order.getOrderStatus().name())
+                        .orderItems(List.of(mapOrderItem(orderItem)))
+                        .build()).collect(Collectors.toList());
     }
 
     @Override
     public String cancelOrder(Long orderId) {
-        return null;
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        order.setOrderStatus(OrderStatus.CANCELLED);
+        orderRepository.save(order);
+        return "Order cancelled successfully. OrderId: " + order.getOrderId();
     }
 
     @Override
-    public List<OrderResponseVO> getCustomerOrders(Long customerId) {
-        return null;
+    public List<OrderResponseVO> getCustomerOrders(Long customerId) throws CustomerNotFoundException {
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
+
+        return customer.getOrders().stream()
+                .map(order -> OrderResponseVO.builder()
+                        .orderId(order.getOrderId())
+                        .orderDate(order.getOrderDate().toString())
+                        .orderStatus(order.getOrderStatus().name())
+                        .orderItems(order.getOrderItems()
+                                .stream().map(this::mapOrderItem)
+                                .collect(Collectors.toList())).build()).collect(Collectors.toList());
     }
 
     @Override
-    public void updateOrderStatus(Long orderId, OrderStatus status) {
+    public String updateOrderStatus(Long orderId, OrderStatus status) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
 
+        order.setOrderStatus(status);
+        orderRepository.save(order);
+        return "Order status updated";
     }
 
     private OrderItem mapOrderItemVO(OrderItemVO orderItemVO) {
@@ -95,5 +121,14 @@ public class OrderServiceImpl implements OrderService {
         } catch (ProductNotFoundException e) {
             throw new RuntimeException("Product not found");
         }
+    }
+
+    private OrderItemVO mapOrderItem(OrderItem orderItem) {
+        return OrderItemVO.builder()
+                .productId(orderItem.getProduct().getProductNumber())
+                .productPrice(orderItem.getQuotedPrice())
+                .deliveryDate(orderItem.getDeliveryDate())
+                .quantity(orderItem.getQuantityOrdered())
+                .build();
     }
 }
