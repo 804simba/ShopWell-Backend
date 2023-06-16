@@ -1,19 +1,19 @@
 package com.shopwell.api.service;
 
-import com.simba.shopwell.exceptions.ProductNotFoundException;
-import com.simba.shopwell.model.DTOs.request.ProductVO;
-import com.simba.shopwell.model.DTOs.response.ApiResponse;
+import com.shopwell.api.exceptions.ProductNotFoundException;
+import com.shopwell.api.model.DTOs.request.ProductRegistrationVO;
+import com.shopwell.api.model.DTOs.response.ApiResponse;
 
 import java.util.List;
 
 public interface ProductService {
-    ApiResponse<?> saveProduct(ProductVO productVO);
+    ApiResponse<?> saveProduct(ProductRegistrationVO productRegistrationVO);
 
-    ApiResponse<?> editProduct(Long id, ProductVO productVO) throws ProductNotFoundException;
+    ApiResponse<?> editProduct(Long id, ProductRegistrationVO productRegistrationVO) throws ProductNotFoundException;
 
     ApiResponse<?> getProduct(Long id) throws ProductNotFoundException;
 
-    ApiResponse<List<ProductVO>> searchProducts(String keyword);
+    ApiResponse<List<ProductRegistrationVO>> searchProducts(String keyword);
 
     ApiResponse<?> deleteProduct(Long id);
 }

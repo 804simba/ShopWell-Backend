@@ -1,6 +1,6 @@
 package com.shopwell.api.utils;
 
-import com.simba.shopwell.model.entity.Product;
+import com.shopwell.api.model.entity.Product;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 

@@ -6,6 +6,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Timestamp;
+import java.util.List;
+
 @Entity
 @Table(name = "employees")
 @Data
@@ -25,7 +28,8 @@ public class Employee {
 
     private String employeeEmail;
 
-    private String employeeDateOfBirth;
+    @Temporal(TemporalType.DATE)
+    private Timestamp employeeDateOfBirth;
 
     private String employeePhoneNumber;
 
@@ -33,5 +37,6 @@ public class Employee {
 
     private String employeeCity;
 
-    private String employeeZipCode;
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Order> orders;
 }
