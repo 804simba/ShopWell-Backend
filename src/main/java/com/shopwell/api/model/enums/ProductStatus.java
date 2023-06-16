@@ -1,5 +1,5 @@
 package com.shopwell.api.model.enums;
 
-public enum PRODUCT_STATUS {
+public enum ProductStatus {
     IN_STOCK, OUT_OF_STOCK
 }

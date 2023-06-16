@@ -1,5 +1,6 @@
 package com.shopwell.api.model.entity;
 
+import com.shopwell.api.model.enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -31,6 +32,10 @@ public class Order {
 
     @Column(name = "order_total")
     private BigDecimal orderTotal;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "order_status")
+    private OrderStatus orderStatus;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", referencedColumnName = "customerId")
