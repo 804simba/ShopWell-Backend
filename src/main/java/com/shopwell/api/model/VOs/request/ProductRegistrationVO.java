@@ -1,4 +1,4 @@
-package com.shopwell.api.model.DTOs.request;
+package com.shopwell.api.model.VOs.request;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+
+import java.math.BigDecimal;
 
 @Data
 @AllArgsConstructor
@@ -21,7 +23,7 @@ public class ProductRegistrationVO {
 
     @NotNull
     @NotEmpty(message = "Enter product price")
-    private Long productPrice;
+    private BigDecimal productPrice;
 
     @NotEmpty(message = "Enter brand name")
     private String brandName;

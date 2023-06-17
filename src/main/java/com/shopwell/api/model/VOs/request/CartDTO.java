@@ -1,6 +1,6 @@
-package com.shopwell.api.model.DTOs.request;
+package com.shopwell.api.model.VOs.request;
 
-import com.shopwell.api.model.DTOs.request.CartRequestVO.CartItemVO;
+import com.shopwell.api.model.VOs.request.CartRequestVO.CartItemVO;
 
 import java.util.List;
 

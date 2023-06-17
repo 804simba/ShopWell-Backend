@@ -1,4 +1,4 @@
-package com.shopwell.api.model.DTOs.response;
+package com.shopwell.api.model.VOs.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,6 +1,6 @@
 package com.shopwell.api.service.implementations;
 
-import com.shopwell.api.model.DTOs.request.EmployeeRegistrationVO;
+import com.shopwell.api.model.VOs.request.EmployeeRegistrationVO;
 import com.shopwell.api.model.entity.Employee;
 import com.shopwell.api.repository.EmployeeRepository;
 import com.shopwell.api.service.EmployeeService;

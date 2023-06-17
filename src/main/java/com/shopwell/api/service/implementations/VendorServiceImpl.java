@@ -1,6 +1,6 @@
 package com.shopwell.api.service.implementations;
 
-import com.shopwell.api.model.DTOs.request.VendorRegistrationVO;
+import com.shopwell.api.model.VOs.request.VendorRegistrationVO;
 import com.shopwell.api.model.entity.Vendor;
 import com.shopwell.api.repository.VendorRepository;
 import com.shopwell.api.service.VendorService;

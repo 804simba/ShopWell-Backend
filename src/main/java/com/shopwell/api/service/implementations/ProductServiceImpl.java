@@ -1,20 +1,27 @@
 package com.shopwell.api.service.implementations;
 
 import com.shopwell.api.exceptions.ProductNotFoundException;
-import com.shopwell.api.model.DTOs.request.CartItemVO;
-import com.shopwell.api.model.DTOs.request.ProductRegistrationVO;
-import com.shopwell.api.model.DTOs.response.ApiResponseVO;
+import com.shopwell.api.model.VOs.request.CartItemVO;
+import com.shopwell.api.model.VOs.request.ProductRegistrationVO;
+import com.shopwell.api.model.VOs.request.ProductSearchRequestVO;
+import com.shopwell.api.model.VOs.response.ApiResponseVO;
+import com.shopwell.api.model.VOs.response.ProductResponseVO;
+import com.shopwell.api.model.VOs.response.ProductSearchResponseVO;
 import com.shopwell.api.model.entity.Brand;
 import com.shopwell.api.model.entity.Product;
 import com.shopwell.api.repository.BrandRepository;
 import com.shopwell.api.repository.ProductRepository;
 import com.shopwell.api.service.CartService;
 import com.shopwell.api.service.ProductService;
+import com.shopwell.api.utils.search.ProductSpecificationBuilder;
+import com.shopwell.api.utils.search.SearchCriteria;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +35,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ApiResponseVO<?> saveProduct(ProductRegistrationVO productRegistrationVO) {
         try {
-            productRepository.save(toProductEntity(productRegistrationVO));
+            productRepository.save(mapProductRegistrationVOToProduct(productRegistrationVO));
             return ApiResponseVO.builder()
                     .message("Product saved successfully")
                     .payload(productRegistrationVO)
@@ -36,30 +43,33 @@ public class ProductServiceImpl implements ProductService {
         } catch (Exception e) {
             return ApiResponseVO.builder()
                     .message("Product not saved successfully")
-                    .error(e.getMessage())
                     .build();
         }
     }
 
     @Override
-    public ApiResponseVO<?> editProduct(Long id, ProductRegistrationVO productRegistrationVO) throws ProductNotFoundException {
-        Product foundProduct = productRepository.findById(id)
-                .orElseThrow(() -> new ProductNotFoundException("Product not found"));
+    public ApiResponseVO<?> editProduct(Long id, ProductRegistrationVO productRegistrationVO) {
+        try {
+            Product foundProduct = productRepository.findById(id)
+                    .orElseThrow(() -> new ProductNotFoundException("Product not found"));
 
-        foundProduct.setProductName(productRegistrationVO.getProductName());
-        foundProduct.setProductDescription(productRegistrationVO.getProductDescription());
-        foundProduct.setProductPrice(productRegistrationVO.getProductPrice());
+            foundProduct.setProductName(productRegistrationVO.getProductName());
+            foundProduct.setProductDescription(productRegistrationVO.getProductDescription());
+            foundProduct.setProductPrice(productRegistrationVO.getProductPrice());
 
-        Brand brand = brandRepository.findByBrandName(productRegistrationVO.getBrandName());
+            Brand brand = brandRepository.findByBrandName(productRegistrationVO.getBrandName());
 
-        foundProduct.setBrand(brand);
+            foundProduct.setBrand(brand);
 
-        var savedProduct = productRepository.save(foundProduct);
+            var savedProduct = productRepository.save(foundProduct);
 
-        return ApiResponseVO.builder()
-                .message("Product saved successfully")
-                .payload(toProductVO(savedProduct))
-                .build();
+            return ApiResponseVO.builder()
+                    .message("Product saved successfully")
+                    .payload(mapProductToVO(savedProduct))
+                    .build();
+        } catch (ProductNotFoundException e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     @Override
@@ -68,7 +78,7 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new ProductNotFoundException("Product not found"));
         return ApiResponseVO.builder()
                 .message("Product saved successfully")
-                .payload(toProductVO(foundProduct))
+                .payload(mapProductToVO(foundProduct))
                 .build();
     }
 
@@ -81,8 +91,34 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ApiResponseVO<List<ProductRegistrationVO>> searchProducts(String keyword) {
-        return null;
+    public ApiResponseVO<ProductSearchResponseVO> searchProductsByCriteria(int pageNumber, int pageSize, ProductSearchRequestVO searchRequestVO) {
+
+        ProductSpecificationBuilder builder = new ProductSpecificationBuilder();
+
+        List<SearchCriteria> criteriaList = searchRequestVO.getSearchCriteriaList();
+
+        if (criteriaList != null) {
+            criteriaList.forEach(criteria -> {
+                criteria.setDataOption(searchRequestVO.getDataOption());
+                builder.with(criteria);
+            });
+        }
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize,
+                Sort.by("productPrice").ascending()
+                        .and(Sort.by("productName")).ascending()
+                        .and(Sort.by("brandName")).ascending()
+                        .and(Sort.by("categoryName")).ascending());
+
+        Page<Product> productPage = productRepository.findAll(builder.build(), pageable);
+
+        List<ProductResponseVO> products = productPage.getContent().stream()
+                .map(this::mapProductToVO)
+                .collect(Collectors.toList());
+
+        ProductSearchResponseVO searchResponseVO = new ProductSearchResponseVO(new PageImpl<>(products, pageable, productPage.getTotalPages()));
+
+        return new ApiResponseVO<>("Search results", searchResponseVO);
     }
 
     @Override
@@ -113,7 +149,7 @@ public class ProductServiceImpl implements ProductService {
         return cartService.calculateTotalPrice(customerId);
     }
 
-    private Product toProductEntity(ProductRegistrationVO productRegistrationVO) {
+    private Product mapProductRegistrationVOToProduct(ProductRegistrationVO productRegistrationVO) {
         Brand brand = brandRepository.findByBrandName(productRegistrationVO.getBrandName());
         return Product.builder()
                 .productName(productRegistrationVO.getProductName())
@@ -123,12 +159,15 @@ public class ProductServiceImpl implements ProductService {
                 .build();
     }
 
-    private ProductRegistrationVO toProductVO(Product product) {
-        return ProductRegistrationVO.builder()
+    private ProductResponseVO mapProductToVO(Product product) {
+        return ProductResponseVO.builder()
+                .productId(product.getProductNumber())
                 .productName(product.getProductName())
-                .productDescription(product.getProductDescription())
-                .productPrice(product.getProductPrice())
                 .brandName(product.getBrand().getBrandName())
+                .categoryName(product.getCategory().getCategoryName())
+                .productDescription(product.getProductDescription())
+                .productPrice(String.valueOf(product.getProductPrice()))
+                .quantityAvailable(product.getQuantityAvailable())
                 .build();
     }
 }

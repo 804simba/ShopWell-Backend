@@ -1,6 +1,6 @@
 package com.shopwell.api.service.implementations;
 
-import com.shopwell.api.model.DTOs.request.BrandRegistrationVO;
+import com.shopwell.api.model.VOs.request.BrandRegistrationVO;
 import com.shopwell.api.model.entity.Brand;
 import com.shopwell.api.repository.BrandRepository;
 import com.shopwell.api.service.BrandService;

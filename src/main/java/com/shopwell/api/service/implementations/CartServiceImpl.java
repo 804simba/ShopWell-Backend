@@ -1,6 +1,6 @@
 package com.shopwell.api.service.implementations;
 
-import com.shopwell.api.model.DTOs.request.CartItemVO;
+import com.shopwell.api.model.VOs.request.CartItemVO;
 import com.shopwell.api.model.entity.Cart;
 import com.shopwell.api.model.entity.CartItem;
 import com.shopwell.api.model.entity.Customer;
@@ -8,7 +8,6 @@ import com.shopwell.api.model.entity.Product;
 import com.shopwell.api.repository.CartItemRepository;
 import com.shopwell.api.repository.CartRepository;
 import com.shopwell.api.repository.CustomerRepository;
-import com.shopwell.api.repository.ProductRepository;
 import com.shopwell.api.service.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

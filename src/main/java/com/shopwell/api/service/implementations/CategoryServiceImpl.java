@@ -1,6 +1,6 @@
 package com.shopwell.api.service.implementations;
 
-import com.shopwell.api.model.DTOs.request.CategoryRegistrationVO;
+import com.shopwell.api.model.VOs.request.CategoryRegistrationVO;
 import com.shopwell.api.model.entity.Category;
 import com.shopwell.api.repository.CategoryRepository;
 import com.shopwell.api.service.CategoryService;

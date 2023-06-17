@@ -1,8 +1,8 @@
 package com.shopwell.api.service;
 
 import com.shopwell.api.exceptions.CustomerNotFoundException;
-import com.shopwell.api.model.DTOs.request.OrderRequestVO;
-import com.shopwell.api.model.DTOs.response.OrderResponseVO;
+import com.shopwell.api.model.VOs.request.OrderRequestVO;
+import com.shopwell.api.model.VOs.response.OrderResponseVO;
 import com.shopwell.api.model.enums.OrderStatus;
 
 import java.util.List;

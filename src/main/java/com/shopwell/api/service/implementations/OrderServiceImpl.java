@@ -2,9 +2,9 @@ package com.shopwell.api.service.implementations;
 
 import com.shopwell.api.exceptions.CustomerNotFoundException;
 import com.shopwell.api.exceptions.ProductNotFoundException;
-import com.shopwell.api.model.DTOs.request.OrderRequestVO;
-import com.shopwell.api.model.DTOs.request.OrderRequestVO.OrderItemVO;
-import com.shopwell.api.model.DTOs.response.OrderResponseVO;
+import com.shopwell.api.model.VOs.request.OrderRequestVO;
+import com.shopwell.api.model.VOs.request.OrderRequestVO.OrderItemVO;
+import com.shopwell.api.model.VOs.response.OrderResponseVO;
 import com.shopwell.api.model.entity.Customer;
 import com.shopwell.api.model.entity.Order;
 import com.shopwell.api.model.entity.OrderItem;
