@@ -1,9 +1,7 @@
 package com.shopwell.api.service.implementations;
 
 import com.shopwell.api.exceptions.ProductNotFoundException;
-import com.shopwell.api.model.VOs.request.CartItemVO;
-import com.shopwell.api.model.VOs.request.ProductRegistrationVO;
-import com.shopwell.api.model.VOs.request.ProductSearchRequestVO;
+import com.shopwell.api.model.VOs.request.*;
 import com.shopwell.api.model.VOs.response.ApiResponseVO;
 import com.shopwell.api.model.VOs.response.ProductResponseVO;
 import com.shopwell.api.model.VOs.response.ProductSearchResponseVO;
@@ -122,12 +120,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public String addProductToCart(Long productId, Long customerId, int quantity) {
-        Product foundProduct = productRepository.findById(productId)
+    public String addProductToCart(AddToCartRequestVO addToCartRequestVO) {
+        Product foundProduct = productRepository.findById(addToCartRequestVO.getProductId())
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        cartService.addProductToCart(foundProduct, customerId, quantity);
-        return "Product added to cart successfully.";
+        return cartService.addProductToCart(foundProduct, addToCartRequestVO.getCustomerId(), addToCartRequestVO.getQuantity());
     }
 
     @Override
@@ -135,8 +132,7 @@ public class ProductServiceImpl implements ProductService {
         Product foundProduct = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        cartService.removeProductFromCart(foundProduct, customerId);
-        return "Product removed from cart successfully";
+        return cartService.removeProductFromCart(foundProduct, customerId);
     }
 
     @Override
