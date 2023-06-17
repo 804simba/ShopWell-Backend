@@ -1,9 +1,12 @@
 package com.shopwell.api.service;
 
 import com.shopwell.api.exceptions.ProductNotFoundException;
-import com.shopwell.api.model.DTOs.request.CartItemVO;
-import com.shopwell.api.model.DTOs.request.ProductRegistrationVO;
-import com.shopwell.api.model.DTOs.response.ApiResponseVO;
+import com.shopwell.api.model.VOs.request.CartItemVO;
+import com.shopwell.api.model.VOs.request.ProductRegistrationVO;
+import com.shopwell.api.model.VOs.request.ProductSearchRequestVO;
+import com.shopwell.api.model.VOs.response.ApiResponseVO;
+import com.shopwell.api.model.VOs.response.ProductSearchResponseVO;
+import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -16,7 +19,7 @@ public interface ProductService {
 
     ApiResponseVO<?> getProduct(Long id) throws ProductNotFoundException;
 
-    ApiResponseVO<List<ProductRegistrationVO>> searchProducts(String keyword);
+    ApiResponseVO<ProductSearchResponseVO> searchProductsByCriteria(int pageNumber, int pageSize, ProductSearchRequestVO productSearchRequestVO);
 
     ApiResponseVO<?> deleteProduct(Long id);
 

@@ -1,4 +1,4 @@
-package com.shopwell.api.model.DTOs.request;
+package com.shopwell.api.model.VOs.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,13 +11,17 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @Data
 @Builder
-public class CartItemVO {
+public class CartItemResponseVO {
+
+    private Long cartItemId;
 
     private Long productId;
 
     private String productName;
 
-    private BigDecimal price;
+    private BigDecimal productPrice;
 
     private int quantity;
+
+    private String productImage;
 }

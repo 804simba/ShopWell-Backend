@@ -1,4 +1,4 @@
-package com.shopwell.api.model.DTOs.request;
+package com.shopwell.api.model.VOs.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;

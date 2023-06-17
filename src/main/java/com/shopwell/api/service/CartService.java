@@ -1,6 +1,6 @@
 package com.shopwell.api.service;
 
-import com.shopwell.api.model.DTOs.request.CartItemVO;
+import com.shopwell.api.model.VOs.request.CartItemVO;
 import com.shopwell.api.model.entity.Product;
 
 import java.math.BigDecimal;
