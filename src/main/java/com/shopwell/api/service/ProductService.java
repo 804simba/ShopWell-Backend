@@ -1,9 +1,7 @@
 package com.shopwell.api.service;
 
 import com.shopwell.api.exceptions.ProductNotFoundException;
-import com.shopwell.api.model.VOs.request.CartItemVO;
-import com.shopwell.api.model.VOs.request.ProductRegistrationVO;
-import com.shopwell.api.model.VOs.request.ProductSearchRequestVO;
+import com.shopwell.api.model.VOs.request.*;
 import com.shopwell.api.model.VOs.response.ApiResponseVO;
 import com.shopwell.api.model.VOs.response.ProductSearchResponseVO;
 import org.springframework.data.domain.Page;
@@ -23,7 +21,7 @@ public interface ProductService {
 
     ApiResponseVO<?> deleteProduct(Long id);
 
-    String addProductToCart(Long productId, Long customerId, int quantity);
+    String addProductToCart(AddToCartRequestVO addToCartRequestVO);
 
     String removeProductFromCart(Long productId, Long customerId);
 

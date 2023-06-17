@@ -50,13 +50,7 @@ public class CartServiceImpl implements CartService {
         CartItem cartItem = getCartItemByProductAndCart(product, cart);
 
         if (cartItem != null) {
-            int newQuantity = cartItem.getCartItemQuantity() - 1;
-            if (newQuantity > 0) {
-                cartItem.setCartItemQuantity(newQuantity);
-                cartItemRepository.save(cartItem);
-            } else {
-                cartItemRepository.delete(cartItem);
-            }
+            cartItemRepository.delete(cartItem);
         }
         return "Product removed from cart successfully";
     }
@@ -79,10 +73,10 @@ public class CartServiceImpl implements CartService {
         BigDecimal totalPrice = BigDecimal.ZERO;
 
         for (CartItem cartItem : cartItems) {
-           BigDecimal productPrice = cartItem.getProduct().getProductPrice();
-           int quantity = cartItem.getCartItemQuantity();
-           BigDecimal itemPrice = productPrice.multiply(BigDecimal.valueOf(quantity));
-           totalPrice = totalPrice.add(itemPrice);
+            BigDecimal productPrice = cartItem.getProduct().getProductPrice();
+            int quantity = cartItem.getCartItemQuantity();
+            BigDecimal itemPrice = productPrice.multiply(BigDecimal.valueOf(quantity));
+            totalPrice = totalPrice.add(itemPrice);
         }
 
         return totalPrice;
