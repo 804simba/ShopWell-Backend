@@ -83,7 +83,7 @@ public class CartServiceImpl implements CartService {
     }
 
     private CartItem getCartItemByProductAndCart(Product product, Cart cart) {
-        return cartItemRepository.findByProductAAndCart(product, cart);
+        return cartItemRepository.findByProductAndCart(product, cart);
     }
 
     private Cart getOrCreateCart(Long customerId) {

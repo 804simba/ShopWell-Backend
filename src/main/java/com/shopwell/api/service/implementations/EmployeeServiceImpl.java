@@ -4,10 +4,9 @@ import com.shopwell.api.model.VOs.request.EmployeeRegistrationVO;
 import com.shopwell.api.model.entity.Employee;
 import com.shopwell.api.repository.EmployeeRepository;
 import com.shopwell.api.service.EmployeeService;
+import com.shopwell.api.utils.DateUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.sql.Timestamp;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +24,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .employeeFirstName(registration.getEmployeeFirstName())
                 .employeeLastName(registration.getEmployeeLastName())
                 .employeeEmail(registration.getEmployeeEmail())
-                .employeeDateOfBirth(Timestamp.valueOf(registration.getEmployeeDateOfBirth()))
+                .employeeDateOfBirth(DateUtils.getTimestamp(registration.getEmployeeDateOfBirth()))
                 .employeeCity(registration.getEmployeeCity())
                 .employeeStreetAddress(registration.getEmployeeStreetAddress())
                 .employeePhoneNumber(registration.getEmployeePhoneNumber())

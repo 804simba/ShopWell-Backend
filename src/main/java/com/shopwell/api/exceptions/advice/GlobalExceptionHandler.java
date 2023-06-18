@@ -1,7 +1,7 @@
 package com.shopwell.api.exceptions.advice;
 
-import com.simba.shopwell.exceptions.ProductNotFoundException;
-import com.simba.shopwell.model.DTOs.response.ErrorMessageVO;
+import com.shopwell.api.exceptions.ProductNotFoundException;
+import com.shopwell.api.model.VOs.response.ErrorMessageVO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;

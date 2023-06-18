@@ -24,7 +24,7 @@ public class CustomerRegistrationVO {
 
     @NotNull
     @NotEmpty(message = "Email address must not be empty")
-    @Size(min = 5, max = 30)
+    @Size(min = 5, max = 50)
     @Email(message = "Enter email address")
     private String customerEmail;
 
@@ -32,16 +32,16 @@ public class CustomerRegistrationVO {
 
     @NotNull
     @NotEmpty(message = "Enter your mobile number")
-    @Size(min = 11, max = 15, message = "Mobile number must be 11 to 15 characters long")
+    @Size(min = 11, max = 20, message = "Mobile number must be 11 to 15 characters long")
     private String customerPhoneNumber;
 
     @NotNull
     @NotEmpty(message = "Enter your street address")
-    @Size(min = 5, max = 30)
+    @Size(min = 5, max = 50)
     private String customerStreetAddress;
 
     @NotNull
     @NotEmpty(message = "Enter your city")
-    @Size(min = 5, max = 30)
+    @Size(min = 5, max = 50)
     private String customerCity;
 }

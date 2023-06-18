@@ -7,6 +7,7 @@ import com.shopwell.api.model.VOs.response.CustomerResponseVO;
 import com.shopwell.api.model.entity.Customer;
 import com.shopwell.api.repository.CustomerRepository;
 import com.shopwell.api.service.CustomerService;
+import com.shopwell.api.utils.DateUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +29,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public CustomerResponseVO findCustomerByEmail(String email) throws CustomerNotFoundException {
         Customer foundCustomer = customerRepository
-                .findCustomerByEmail(email).orElseThrow(() -> new CustomerNotFoundException(String.format("Custome with email %s not found", email)));
+                .findCustomerByCustomerEmail(email).orElseThrow(() -> new CustomerNotFoundException(String.format("Custome with email %s not found", email)));
         return customerEntityToVO(foundCustomer);
     }
 
@@ -47,7 +48,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .customerEmail(customerRegistrationVO.getCustomerEmail())
                 .customerPhoneNumber(customerRegistrationVO.getCustomerPhoneNumber())
                 .customerCity(customerRegistrationVO.getCustomerCity())
-                .customerDateOfBirth(Timestamp.valueOf(customerRegistrationVO.getCustomerDateOfBirth()))
+                .customerDateOfBirth(DateUtils.getTimestamp(customerRegistrationVO.getCustomerDateOfBirth()))
                 .customerStreetAddress(customerRegistrationVO.getCustomerStreetAddress())
                 .build();
     }
