@@ -6,13 +6,15 @@ import com.shopwell.api.repository.BrandRepository;
 import com.shopwell.api.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-public class DataSeeder implements CommandLineRunner {
+@Configuration
+public class BrandAndCategorySeeder implements CommandLineRunner {
 
     private final BrandRepository brandRepository;
     private final CategoryRepository categoryRepository;

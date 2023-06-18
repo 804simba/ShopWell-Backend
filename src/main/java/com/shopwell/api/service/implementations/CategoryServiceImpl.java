@@ -21,7 +21,6 @@ public class CategoryServiceImpl implements CategoryService {
     private Category mapCategoryRegistrationVO(CategoryRegistrationVO categoryRegistrationVO) {
         return Category.builder()
                 .categoryName(categoryRegistrationVO.getCategoryName())
-                .categoryDescription(categoryRegistrationVO.getCategoryDescription())
                 .build();
     }
 }

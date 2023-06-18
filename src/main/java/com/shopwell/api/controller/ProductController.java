@@ -21,7 +21,7 @@ public final class ProductController {
     private final ProductService productService;
 
     @PostMapping
-    public ResponseEntity<ApiResponseVO<?>> saveProduct(final ProductRegistrationVO registrationVO) {
+    public ResponseEntity<ApiResponseVO<?>> saveProduct(@RequestBody final ProductRegistrationVO registrationVO) {
         log.info("Saving product: " + registrationVO);
         ApiResponseVO<?> response = new ApiResponseVO<>("Saved successfully", productService.saveProduct(registrationVO));
         return new ResponseEntity<>(response, HttpStatus.CREATED);

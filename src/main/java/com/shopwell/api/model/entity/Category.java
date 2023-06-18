@@ -24,9 +24,6 @@ public class Category {
     @Column(name = "category_name")
     private String categoryName;
 
-    @Column(name = "category_desc")
-    private String categoryDescription;
-
     @OneToMany(mappedBy = "category", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Product> products;
 }

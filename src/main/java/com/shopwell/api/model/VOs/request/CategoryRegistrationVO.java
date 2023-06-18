@@ -10,6 +10,4 @@ import lombok.NoArgsConstructor;
 public class CategoryRegistrationVO {
 
     private String categoryName;
-
-    private String categoryDescription;
 }
