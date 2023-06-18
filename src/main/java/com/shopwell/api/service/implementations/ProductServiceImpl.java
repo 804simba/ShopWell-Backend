@@ -6,8 +6,10 @@ import com.shopwell.api.model.VOs.response.ApiResponseVO;
 import com.shopwell.api.model.VOs.response.ProductResponseVO;
 import com.shopwell.api.model.VOs.response.ProductSearchResponseVO;
 import com.shopwell.api.model.entity.Brand;
+import com.shopwell.api.model.entity.Category;
 import com.shopwell.api.model.entity.Product;
 import com.shopwell.api.repository.BrandRepository;
+import com.shopwell.api.repository.CategoryRepository;
 import com.shopwell.api.repository.ProductRepository;
 import com.shopwell.api.service.CartService;
 import com.shopwell.api.service.ProductService;
@@ -27,6 +29,8 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
 
     private final BrandRepository brandRepository;
+
+    private final CategoryRepository categoryRepository;
 
     private final CartService cartService;
 
@@ -147,11 +151,14 @@ public class ProductServiceImpl implements ProductService {
 
     private Product mapProductRegistrationVOToProduct(ProductRegistrationVO productRegistrationVO) {
         Brand brand = brandRepository.findByBrandName(productRegistrationVO.getBrandName());
+        Category category = categoryRepository.findByCategoryName(productRegistrationVO.getCategoryName());
         return Product.builder()
                 .productName(productRegistrationVO.getProductName())
                 .productDescription(productRegistrationVO.getProductDescription())
                 .productPrice(productRegistrationVO.getProductPrice())
                 .brand(brand)
+                .category(category)
+                .quantityAvailable(productRegistrationVO.getQuantityAvailable())
                 .build();
     }
 

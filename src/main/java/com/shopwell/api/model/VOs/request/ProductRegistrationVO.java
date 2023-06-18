@@ -28,6 +28,11 @@ public class ProductRegistrationVO {
     @NotEmpty(message = "Enter brand name")
     private String brandName;
 
+    @NotEmpty(message = "Enter category name")
+    private String categoryName;
+
     @NotEmpty(message = "Enter quantity of product available")
     private Integer quantityAvailable;
+
+    // TODO: Implement product Images field
 }

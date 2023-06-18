@@ -21,20 +21,20 @@ public class ProductVendor implements Serializable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("productId")
-    @JoinColumn(name = "product_id", referencedColumnName = "productId")
+    @JoinColumn(name = "product_id", referencedColumnName = "product_id")
     private Product product;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("vendorId")
-    @JoinColumn(name = "vendor_id", referencedColumnName = "vendorId")
+    @JoinColumn(name = "vendor_id", referencedColumnName = "vendor_id")
     private Vendor vendor;
 
     private BigDecimal wholeSalePrice;
 
     @ElementCollection
     @CollectionTable(name = "delivery_days", joinColumns = {
-            @JoinColumn(name = "product_id", referencedColumnName = "productId"),
-            @JoinColumn(name = "vendor_id", referencedColumnName = "vendorId")
+            @JoinColumn(name = "product_id", referencedColumnName = "product_id"),
+            @JoinColumn(name = "vendor_id", referencedColumnName = "vendor_id")
     })
     private List<String> daysToDeliver;
 }
