@@ -1,5 +1,6 @@
 package com.shopwell.api.service.implementations;
 
+import com.shopwell.api.exceptions.ImageUploadException;
 import com.shopwell.api.exceptions.ProductNotFoundException;
 import com.shopwell.api.model.VOs.request.*;
 import com.shopwell.api.model.VOs.response.ApiResponseVO;
@@ -8,18 +9,24 @@ import com.shopwell.api.model.VOs.response.ProductSearchResponseVO;
 import com.shopwell.api.model.entity.Brand;
 import com.shopwell.api.model.entity.Category;
 import com.shopwell.api.model.entity.Product;
+import com.shopwell.api.model.entity.ProductImage;
 import com.shopwell.api.repository.BrandRepository;
 import com.shopwell.api.repository.CategoryRepository;
+import com.shopwell.api.repository.ProductImageRepository;
 import com.shopwell.api.repository.ProductRepository;
 import com.shopwell.api.service.CartService;
 import com.shopwell.api.service.ProductService;
+import com.shopwell.api.service.image.ProductImageService;
 import com.shopwell.api.utils.search.ProductSpecificationBuilder;
 import com.shopwell.api.utils.search.SearchCriteria;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,16 +39,27 @@ public class ProductServiceImpl implements ProductService {
 
     private final CategoryRepository categoryRepository;
 
+    private final ProductImageRepository productImageRepository;
+
     private final CartService cartService;
+
+    private final ProductImageService productImageService;
 
     @Override
     public ApiResponseVO<?> saveProduct(ProductRegistrationVO productRegistrationVO) {
         try {
-            productRepository.save(mapProductRegistrationVOToProduct(productRegistrationVO));
+            Product product = mapProductRegistrationVOToProduct(productRegistrationVO);
+
+            List<MultipartFile> imageFiles = productRegistrationVO.getImageFiles();
+            List<String> imageURLs = saveProductImages(product.getProductNumber(), imageFiles);
+            product.setProductImageURLs(mapToProductImages(imageURLs));
+
+            productRepository.save(product);
             return ApiResponseVO.builder()
                     .message("Product saved successfully")
                     .payload(productRegistrationVO)
                     .build();
+
         } catch (Exception e) {
             return ApiResponseVO.builder()
                     .message("Product not saved successfully")
@@ -50,6 +68,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public ApiResponseVO<?> editProduct(Long id, ProductRegistrationVO productRegistrationVO) {
         try {
             Product foundProduct = productRepository.findById(id)
@@ -62,6 +81,10 @@ public class ProductServiceImpl implements ProductService {
             Brand brand = brandRepository.findByBrandName(productRegistrationVO.getBrandName());
 
             foundProduct.setBrand(brand);
+
+            List<MultipartFile> imageFiles = productRegistrationVO.getImageFiles();
+            List<String> imageURLs = saveProductImages(foundProduct.getProductNumber(), imageFiles);
+            foundProduct.setProductImageURLs(mapToProductImages(imageURLs));
 
             var savedProduct = productRepository.save(foundProduct);
 
@@ -85,7 +108,14 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ApiResponseVO<?> deleteProduct(Long id) {
+    @Transactional
+    public ApiResponseVO<?> deleteProduct(Long id) throws ProductNotFoundException {
+        Product foundProduct = productRepository.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException("Product not found"));
+
+        foundProduct.getProductImageURLs().forEach(productImage -> productImageService
+                .deleteImage(productImage.getImageUrl()));
+
         productRepository.deleteById(id);
         return ApiResponseVO.builder()
                 .message("Product deleted!")
@@ -118,7 +148,12 @@ public class ProductServiceImpl implements ProductService {
                 .map(this::mapProductToVO)
                 .collect(Collectors.toList());
 
-        ProductSearchResponseVO searchResponseVO = new ProductSearchResponseVO(new PageImpl<>(products, pageable, productPage.getTotalPages()));
+        ProductSearchResponseVO searchResponseVO = new ProductSearchResponseVO();
+        searchResponseVO.setProducts(products);
+        searchResponseVO.setPageSize(productPage.getSize());
+        searchResponseVO.setPageNumber(productPage.getNumber());
+        searchResponseVO.setTotalPages(productPage.getTotalPages());
+        searchResponseVO.setTotalElements(productPage.getTotalElements());
 
         return new ApiResponseVO<>("Search results", searchResponseVO);
     }
@@ -172,5 +207,33 @@ public class ProductServiceImpl implements ProductService {
                 .productPrice(String.valueOf(product.getProductPrice()))
                 .quantityAvailable(product.getQuantityAvailable())
                 .build();
+    }
+
+    private List<ProductImage> mapToProductImages(List<String> imageURLs) {
+        return imageURLs.stream().map(url -> ProductImage.builder()
+                .imageUrl(url)
+                .build()).collect(Collectors.toList());
+    }
+
+    private List<String> saveProductImages(Long productNumber, List<MultipartFile> imageFiles) {
+        List<String> imageURLs = new ArrayList<>();
+
+        if(imageFiles != null && !imageFiles.isEmpty()) {
+            int maxNumberOfImages = Math.min(imageFiles.size(), 5);
+            List<ProductImage> productImages = new ArrayList<>();
+
+            for (int index = 1; index <= maxNumberOfImages; index++) {
+                MultipartFile imageFile = imageFiles.get(index);
+                try {
+                    String imageURL = productImageService.uploadImage(productNumber, imageFile);
+                    imageURLs.add(imageURL);
+                    productImages.add(ProductImage.builder().imageUrl(imageURL).build());
+                } catch (ImageUploadException e) {
+                    throw new RuntimeException("Could not upload image");
+                }
+            }
+            productImageRepository.saveAll(productImages);
+        }
+        return imageURLs;
     }
 }

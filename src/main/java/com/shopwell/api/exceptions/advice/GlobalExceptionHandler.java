@@ -1,5 +1,7 @@
 package com.shopwell.api.exceptions.advice;
 
+import com.shopwell.api.exceptions.ImageDeleteException;
+import com.shopwell.api.exceptions.ImageUploadException;
 import com.shopwell.api.exceptions.ProductNotFoundException;
 import com.shopwell.api.model.VOs.response.ErrorMessageVO;
 import org.springframework.http.HttpStatus;
@@ -11,6 +13,24 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class GlobalExceptionHandler {
     @ExceptionHandler(ProductNotFoundException.class)
     public ResponseEntity<?> productNotFound(ProductNotFoundException exception) {
+        var errorMessageVO = ErrorMessageVO.builder()
+                .message(exception.getMessage())
+                .status(HttpStatus.BAD_REQUEST)
+                .build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessageVO);
+    }
+
+    @ExceptionHandler(ImageUploadException.class)
+    public ResponseEntity<?> imageUploadException(ImageUploadException exception) {
+        var errorMessageVO = ErrorMessageVO.builder()
+                .message(exception.getMessage())
+                .status(HttpStatus.BAD_REQUEST)
+                .build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessageVO);
+    }
+
+    @ExceptionHandler(ImageDeleteException.class)
+    public ResponseEntity<?> imageDeleteException(ImageDeleteException exception) {
         var errorMessageVO = ErrorMessageVO.builder()
                 .message(exception.getMessage())
                 .status(HttpStatus.BAD_REQUEST)

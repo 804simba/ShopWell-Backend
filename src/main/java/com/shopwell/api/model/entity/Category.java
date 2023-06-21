@@ -13,6 +13,10 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(
+        name = "categories",
+        indexes = @Index(name = "category_name_idx", columnList = "category_name")
+)
 public class Category {
     @Id
     @GeneratedValue(

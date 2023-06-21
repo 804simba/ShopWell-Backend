@@ -20,22 +20,22 @@ public final class ProductController {
 
     private final ProductService productService;
 
-    @PostMapping
-    public ResponseEntity<ApiResponseVO<?>> saveProduct(@RequestBody final ProductRegistrationVO registrationVO) {
+    @PostMapping(consumes = "multipart/form-data")
+    public ResponseEntity<ApiResponseVO<?>> saveProduct(@RequestPart final ProductRegistrationVO registrationVO) {
         log.info("Saving product: " + registrationVO);
         ApiResponseVO<?> response = new ApiResponseVO<>("Saved successfully", productService.saveProduct(registrationVO));
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @PutMapping
-    public ResponseEntity<ApiResponseVO<?>> editProduct(final Long productId, final ProductRegistrationVO registrationVO) throws ProductNotFoundException {
+    @PutMapping(consumes = "multipart/form-data")
+    public ResponseEntity<ApiResponseVO<?>> editProduct(final Long productId, @RequestPart final ProductRegistrationVO registrationVO) throws ProductNotFoundException {
         log.info("Editing product: " + registrationVO);
         ApiResponseVO<?> response = new ApiResponseVO<>("Saved successfully", productService.editProduct(productId, registrationVO));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/{productId}")
-    public ResponseEntity<ApiResponseVO<?>> deleteProduct(@PathVariable("productId") final Long productId) {
+    public ResponseEntity<ApiResponseVO<?>> deleteProduct(@PathVariable("productId") final Long productId) throws ProductNotFoundException {
         log.info("Deleting product with id: " + productId);
         ApiResponseVO<?> response = new ApiResponseVO<>("Deleted successfully", productService.deleteProduct(productId));
         return new ResponseEntity<>(response, HttpStatus.OK);

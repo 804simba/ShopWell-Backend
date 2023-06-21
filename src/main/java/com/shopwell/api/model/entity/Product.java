@@ -7,7 +7,10 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
-@Table(name = "products")
+@Table(
+        name = "products",
+        indexes = @Index(name = "product_name_idx", columnList = "product_name")
+)
 @Getter
 @Setter
 @ToString
@@ -34,8 +37,9 @@ public class Product {
     @Column(name = "quantity")
     private Integer quantityAvailable;
 
-    @Column(name = "product_image")
-    private String productImageURL;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "product_id")
+    private List<ProductImage> productImageURLs;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", referencedColumnName = "category_id")
