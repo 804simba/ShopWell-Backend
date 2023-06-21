@@ -5,10 +5,20 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductSearchResponseVO {
 
-    private Page<ProductResponseVO> products;
+    private List<ProductResponseVO> products;
+
+    private Integer pageNumber;
+
+    private Integer pageSize;
+
+    private Integer totalPages;
+
+    private Long totalElements;
 }

@@ -19,7 +19,7 @@ public interface ProductService {
 
     ApiResponseVO<ProductSearchResponseVO> searchProductsByCriteria(int pageNumber, int pageSize, ProductSearchRequestVO productSearchRequestVO);
 
-    ApiResponseVO<?> deleteProduct(Long id);
+    ApiResponseVO<?> deleteProduct(Long id) throws ProductNotFoundException;
 
     String addProductToCart(AddToCartRequestVO addToCartRequestVO);
 

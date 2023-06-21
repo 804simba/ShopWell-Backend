@@ -9,7 +9,10 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 @Entity
-@Table(name = "brands")
+@Table(
+        name = "brands",
+        indexes = @Index(name = "brand_name_idx", columnList = "brand_name")
+)
 @Data
 @Builder
 @NoArgsConstructor
