@@ -109,8 +109,8 @@ public class ProductServiceImpl implements ProductService {
         Pageable pageable = PageRequest.of(pageNumber, pageSize,
                 Sort.by("productPrice").ascending()
                         .and(Sort.by("productName")).ascending()
-                        .and(Sort.by("brandName")).ascending()
-                        .and(Sort.by("categoryName")).ascending());
+                        .and(Sort.by("brand.brandName")).ascending()
+                        .and(Sort.by("category.categoryName")).ascending());
 
         Page<Product> productPage = productRepository.findAll(builder.build(), pageable);
 

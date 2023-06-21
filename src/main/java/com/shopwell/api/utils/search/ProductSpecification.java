@@ -26,6 +26,18 @@ public class ProductSpecification implements Specification<Product> {
 
         switch (Objects.requireNonNull(SearchOperation.getSimpleOperation(searchCriteria.getOperation()))) {
             case CONTAINS -> {
+                switch (searchCriteria.getFilterKey()) {
+                    case "brandName" -> {
+                        Join<Product, Brand> brandJoin = root.join("brand", JoinType.INNER);
+                        return cb.like(cb.lower(brandJoin.get("brandName")), "%" + stringToSearch + "%");
+
+                    }
+                    case "categoryName" -> {
+                        Join<Product, Brand> brandJoin = root.join("category", JoinType.INNER);
+                        return cb.like(cb.lower(brandJoin.get("categoryName")), "%" + stringToSearch + "%");
+
+                    }
+                }
                 return cb.like(cb.lower(root.get(searchCriteria.getFilterKey())), "%" + stringToSearch + "%");
             }
             case DOES_NOT_CONTAIN -> {
@@ -44,30 +56,38 @@ public class ProductSpecification implements Specification<Product> {
                 return cb.notLike(cb.lower(root.get(searchCriteria.getFilterKey())), "%" + stringToSearch);
             }
             case EQUAL -> {
-                if (searchCriteria.getFilterKey().equals("productPrice")) {
-                    BigDecimal productPrice = new BigDecimal(stringToSearch);
-                    return cb.equal(root.get(searchCriteria.getFilterKey()), productPrice);
-                } else if (searchCriteria.getFilterKey().equals("brandName")) {
-                    Join<Product, Brand> brandJoin = root.join("brand");
-                    return cb.equal(cb.lower(brandJoin.get("brandName")), stringToSearch);
-                } else if (searchCriteria.getFilterKey().equals("categoryName")) {
-                    Join<Product, Category> categoryJoin = root.join("category");
-                    return cb.equal(cb.lower(categoryJoin.get("categoryName")), stringToSearch);
+                switch (searchCriteria.getFilterKey()) {
+                    case "productPrice" -> {
+                        BigDecimal productPrice = new BigDecimal(stringToSearch);
+                        return cb.equal(root.get(searchCriteria.getFilterKey()), productPrice);
+                    }
+                    case "brandName" -> {
+                        Join<Product, Brand> brandJoin = root.join("brand", JoinType.INNER);
+                        return cb.equal(cb.lower(brandJoin.get("brandName")), stringToSearch);
+                    }
+                    case "categoryName" -> {
+                        Join<Product, Category> categoryJoin = root.join("category", JoinType.INNER);
+                        return cb.equal(cb.lower(categoryJoin.get("categoryName")), stringToSearch);
+                    }
                 }
-                return cb.equal(cb.lower(root.get(searchCriteria.getFilterKey())), stringToSearch);
+                return cb.equal(cb.lower(root.get(searchCriteria.getFilterKey())), stringToSearch.toLowerCase());
             }
             case NOT_EQUAL -> {
-                if (searchCriteria.getFilterKey().equals("productPrice")) {
-                    BigDecimal productPrice = new BigDecimal(stringToSearch);
-                    return cb.notEqual(root.get(searchCriteria.getFilterKey()), productPrice);
-                } else if (searchCriteria.getFilterKey().equals("brandName")) {
-                    Join<Product, Brand> brandJoin = root.join("brand");
-                    return cb.notEqual(cb.lower(brandJoin.get("brandName")), stringToSearch);
-                } else if (searchCriteria.getFilterKey().equals("categoryName")) {
-                    Join<Product, Category> categoryJoin = root.join("category");
-                    return cb.notEqual(cb.lower(categoryJoin.get("categoryName")), stringToSearch);
+                switch (searchCriteria.getFilterKey()) {
+                    case "productPrice" -> {
+                        BigDecimal productPrice = new BigDecimal(stringToSearch);
+                        return cb.notEqual(root.get(searchCriteria.getFilterKey()), productPrice);
+                    }
+                    case "brandName" -> {
+                        Join<Product, Brand> brandJoin = root.join("brand");
+                        return cb.notEqual(cb.lower(brandJoin.get("brandName")), stringToSearch);
+                    }
+                    case "categoryName" -> {
+                        Join<Product, Category> categoryJoin = root.join("category");
+                        return cb.notEqual(cb.lower(categoryJoin.get("categoryName")), stringToSearch);
+                    }
                 }
-                return cb.notEqual(cb.lower(root.get(searchCriteria.getFilterKey())), stringToSearch);
+                return cb.notEqual(cb.lower(root.get(searchCriteria.getFilterKey())), stringToSearch.toLowerCase());
             }
         }
         return null;

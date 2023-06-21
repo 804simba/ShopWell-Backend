@@ -12,6 +12,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 @Entity
+@Table(name = "orders")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
