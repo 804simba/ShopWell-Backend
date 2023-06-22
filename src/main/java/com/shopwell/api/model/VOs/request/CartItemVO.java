@@ -17,7 +17,7 @@ public class CartItemVO {
 
     private String productName;
 
-    private BigDecimal price;
+    private String price;
 
     private int quantity;
 }

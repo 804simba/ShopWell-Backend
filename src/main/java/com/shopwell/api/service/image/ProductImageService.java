@@ -4,6 +4,8 @@ import com.shopwell.api.config.CloudinaryConfig;
 import com.shopwell.api.model.entity.Product;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 public class ProductImageService extends CloudinaryImageServiceImpl<Product>{
     public ProductImageService(CloudinaryConfig config) {
@@ -12,6 +14,7 @@ public class ProductImageService extends CloudinaryImageServiceImpl<Product>{
 
     @Override
     public String getPublicIdPrefix() {
-        return "product_";
+        String uuid = UUID.randomUUID().toString().replace("-", "");
+        return "product_" + uuid + "/";
     }
 }

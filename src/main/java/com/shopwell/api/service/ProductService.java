@@ -27,5 +27,5 @@ public interface ProductService {
 
     List<CartItemVO> getCartItems(Long customerId);
 
-    BigDecimal calculateTotalPrice(Long customerId);
+    Double calculateTotalPrice(Long customerId);
 }

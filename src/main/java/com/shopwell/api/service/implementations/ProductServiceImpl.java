@@ -2,7 +2,10 @@ package com.shopwell.api.service.implementations;
 
 import com.shopwell.api.exceptions.ImageUploadException;
 import com.shopwell.api.exceptions.ProductNotFoundException;
-import com.shopwell.api.model.VOs.request.*;
+import com.shopwell.api.model.VOs.request.AddToCartRequestVO;
+import com.shopwell.api.model.VOs.request.CartItemVO;
+import com.shopwell.api.model.VOs.request.ProductRegistrationVO;
+import com.shopwell.api.model.VOs.request.ProductSearchRequestVO;
 import com.shopwell.api.model.VOs.response.ApiResponseVO;
 import com.shopwell.api.model.VOs.response.ProductResponseVO;
 import com.shopwell.api.model.VOs.response.ProductSearchResponseVO;
@@ -21,11 +24,13 @@ import com.shopwell.api.utils.search.ProductSpecificationBuilder;
 import com.shopwell.api.utils.search.SearchCriteria;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,15 +51,17 @@ public class ProductServiceImpl implements ProductService {
     private final ProductImageService productImageService;
 
     @Override
+    @Transactional
     public ApiResponseVO<?> saveProduct(ProductRegistrationVO productRegistrationVO) {
         try {
             Product product = mapProductRegistrationVOToProduct(productRegistrationVO);
 
             List<MultipartFile> imageFiles = productRegistrationVO.getImageFiles();
-            List<String> imageURLs = saveProductImages(product.getProductNumber(), imageFiles);
-            product.setProductImageURLs(mapToProductImages(imageURLs));
 
-            productRepository.save(product);
+            var savedProduct = productRepository.save(product);
+
+            List<String> imageURLs = saveProductImages(savedProduct, imageFiles);
+            savedProduct.setProductImageURLs(mapToProductImages(imageURLs));
             return ApiResponseVO.builder()
                     .message("Product saved successfully")
                     .payload(productRegistrationVO)
@@ -62,7 +69,7 @@ public class ProductServiceImpl implements ProductService {
 
         } catch (Exception e) {
             return ApiResponseVO.builder()
-                    .message("Product not saved successfully")
+                    .message(String.format("Product not saved successfully %s", e.getMessage()))
                     .build();
         }
     }
@@ -76,14 +83,15 @@ public class ProductServiceImpl implements ProductService {
 
             foundProduct.setProductName(productRegistrationVO.getProductName());
             foundProduct.setProductDescription(productRegistrationVO.getProductDescription());
-            foundProduct.setProductPrice(productRegistrationVO.getProductPrice());
+            foundProduct.setProductPrice(Double.parseDouble(productRegistrationVO.getProductPrice()));
+            foundProduct.setQuantityAvailable(Integer.parseInt(productRegistrationVO.getQuantityAvailable()));
 
             Brand brand = brandRepository.findByBrandName(productRegistrationVO.getBrandName());
 
             foundProduct.setBrand(brand);
 
             List<MultipartFile> imageFiles = productRegistrationVO.getImageFiles();
-            List<String> imageURLs = saveProductImages(foundProduct.getProductNumber(), imageFiles);
+            List<String> imageURLs = saveProductImages(foundProduct, imageFiles);
             foundProduct.setProductImageURLs(mapToProductImages(imageURLs));
 
             var savedProduct = productRepository.save(foundProduct);
@@ -180,7 +188,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public BigDecimal calculateTotalPrice(Long customerId) {
+    public Double calculateTotalPrice(Long customerId) {
         return cartService.calculateTotalPrice(customerId);
     }
 
@@ -190,10 +198,10 @@ public class ProductServiceImpl implements ProductService {
         return Product.builder()
                 .productName(productRegistrationVO.getProductName())
                 .productDescription(productRegistrationVO.getProductDescription())
-                .productPrice(productRegistrationVO.getProductPrice())
+                .productPrice(Double.parseDouble(productRegistrationVO.getProductPrice()))
                 .brand(brand)
                 .category(category)
-                .quantityAvailable(productRegistrationVO.getQuantityAvailable())
+                .quantityAvailable(Integer.parseInt(productRegistrationVO.getQuantityAvailable()))
                 .build();
     }
 
@@ -215,17 +223,17 @@ public class ProductServiceImpl implements ProductService {
                 .build()).collect(Collectors.toList());
     }
 
-    private List<String> saveProductImages(Long productNumber, List<MultipartFile> imageFiles) {
+    private List<String> saveProductImages(Product product, List<MultipartFile> imageFiles) {
         List<String> imageURLs = new ArrayList<>();
 
         if(imageFiles != null && !imageFiles.isEmpty()) {
             int maxNumberOfImages = Math.min(imageFiles.size(), 5);
             List<ProductImage> productImages = new ArrayList<>();
 
-            for (int index = 1; index <= maxNumberOfImages; index++) {
+            for (int index = 0; index < maxNumberOfImages; index++) {
                 MultipartFile imageFile = imageFiles.get(index);
                 try {
-                    String imageURL = productImageService.uploadImage(productNumber, imageFile);
+                    String imageURL = productImageService.uploadImage(product.getProductNumber(), imageFile);
                     imageURLs.add(imageURL);
                     productImages.add(ProductImage.builder().imageUrl(imageURL).build());
                 } catch (ImageUploadException e) {

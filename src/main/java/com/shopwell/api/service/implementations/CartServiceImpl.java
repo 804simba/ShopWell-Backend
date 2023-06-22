@@ -66,17 +66,17 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public BigDecimal calculateTotalPrice(Long customerId) {
+    public Double calculateTotalPrice(Long customerId) {
         Cart cart = getOrCreateCart(customerId);
         List<CartItem> cartItems = cart.getCartItems();
 
-        BigDecimal totalPrice = BigDecimal.ZERO;
+        double totalPrice = 0.0;
 
         for (CartItem cartItem : cartItems) {
-            BigDecimal productPrice = cartItem.getProduct().getProductPrice();
+            Double productPrice = cartItem.getProduct().getProductPrice();
             int quantity = cartItem.getCartItemQuantity();
-            BigDecimal itemPrice = productPrice.multiply(BigDecimal.valueOf(quantity));
-            totalPrice = totalPrice.add(itemPrice);
+            double itemPrice = productPrice * quantity;
+            totalPrice = totalPrice + itemPrice;
         }
 
         return totalPrice;
@@ -103,7 +103,7 @@ public class CartServiceImpl implements CartService {
                 .productId(cartItem.getProduct().getProductNumber())
                 .productName(cartItem.getProduct().getProductName())
                 .quantity(cartItem.getCartItemQuantity())
-                .price(cartItem.getProduct().getProductPrice())
+                .price(String.valueOf(cartItem.getProduct().getProductPrice()))
                 .build();
     }
 }
