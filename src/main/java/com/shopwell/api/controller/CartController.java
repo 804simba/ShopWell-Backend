@@ -45,11 +45,11 @@ public class CartController {
     }
 
     @GetMapping("/{customerId}/total-price")
-    public ApiResponseVO<BigDecimal> calculateTotalPrice(@PathVariable("customerId") Long customerId) {
+    public ApiResponseVO<String> calculateTotalPrice(@PathVariable("customerId") Long customerId) {
         log.info(String.format("Calculating total price of cart for customer %d: ", customerId));
-        BigDecimal totalPrice = productService.calculateTotalPrice(customerId);
+        String totalPrice = String.valueOf(productService.calculateTotalPrice(customerId));
 
-        return ApiResponseVO.<BigDecimal>builder()
+        return ApiResponseVO.<String>builder()
                 .message("Total price calculated successfully")
                 .payload(totalPrice)
                 .build();

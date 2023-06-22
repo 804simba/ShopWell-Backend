@@ -6,9 +6,11 @@ import com.shopwell.api.model.VOs.request.ProductSearchRequestVO;
 import com.shopwell.api.model.VOs.response.ApiResponseVO;
 import com.shopwell.api.model.VOs.response.ProductSearchResponseVO;
 import com.shopwell.api.service.ProductService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,24 +22,24 @@ public final class ProductController {
 
     private final ProductService productService;
 
-    @PostMapping(consumes = "multipart/form-data")
-    public ResponseEntity<ApiResponseVO<?>> saveProduct(@RequestPart final ProductRegistrationVO registrationVO) {
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponseVO<?>> saveProduct(@Valid @ModelAttribute final ProductRegistrationVO registrationVO) {
         log.info("Saving product: " + registrationVO);
-        ApiResponseVO<?> response = new ApiResponseVO<>("Saved successfully", productService.saveProduct(registrationVO));
+        ApiResponseVO<?> response = new ApiResponseVO<>("null", productService.saveProduct(registrationVO));
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @PutMapping(consumes = "multipart/form-data")
     public ResponseEntity<ApiResponseVO<?>> editProduct(final Long productId, @RequestPart final ProductRegistrationVO registrationVO) throws ProductNotFoundException {
         log.info("Editing product: " + registrationVO);
-        ApiResponseVO<?> response = new ApiResponseVO<>("Saved successfully", productService.editProduct(productId, registrationVO));
+        ApiResponseVO<?> response = new ApiResponseVO<>("null", productService.editProduct(productId, registrationVO));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/{productId}")
     public ResponseEntity<ApiResponseVO<?>> deleteProduct(@PathVariable("productId") final Long productId) throws ProductNotFoundException {
         log.info("Deleting product with id: " + productId);
-        ApiResponseVO<?> response = new ApiResponseVO<>("Deleted successfully", productService.deleteProduct(productId));
+        ApiResponseVO<?> response = new ApiResponseVO<>("null", productService.deleteProduct(productId));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
