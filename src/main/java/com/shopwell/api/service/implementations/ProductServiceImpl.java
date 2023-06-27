@@ -57,7 +57,6 @@ public class ProductServiceImpl implements ProductService {
             Product product = mapProductRegistrationVOToProduct(productRegistrationVO);
 
             List<MultipartFile> imageFiles = productRegistrationVO.getImageFiles();
-
             var savedProduct = productRepository.save(product);
 
             List<String> imageURLs = saveProductImages(savedProduct, imageFiles);
@@ -69,7 +68,7 @@ public class ProductServiceImpl implements ProductService {
 
         } catch (Exception e) {
             return ApiResponseVO.builder()
-                    .message(String.format("Product not saved successfully %s", e.getMessage()))
+                    .message(String.format("Product was not saved:: %s", e.getMessage()))
                     .build();
         }
     }
@@ -193,8 +192,18 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private Product mapProductRegistrationVOToProduct(ProductRegistrationVO productRegistrationVO) {
-        Brand brand = brandRepository.findByBrandName(productRegistrationVO.getBrandName());
-        Category category = categoryRepository.findByCategoryName(productRegistrationVO.getCategoryName());
+        Brand brand = Brand.builder()
+                .brandName(productRegistrationVO.getBrandName())
+                .build();
+
+        brandRepository.save(brand);
+
+        Category category = Category.builder()
+                .categoryName(productRegistrationVO.getCategoryName())
+                .build();
+
+        categoryRepository.save(category);
+
         return Product.builder()
                 .productName(productRegistrationVO.getProductName())
                 .productDescription(productRegistrationVO.getProductDescription())

@@ -9,10 +9,12 @@ import com.shopwell.api.exceptions.ImageUploadException;
 import com.shopwell.api.service.ImageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
 
 @Service
@@ -24,32 +26,16 @@ public class CloudinaryImageServiceImpl<T> implements ImageService<T> {
     @Override
     public String uploadImage(Long productId, MultipartFile imageFile) {
         try {
-            if (imageFile.isEmpty()) {
-                throw new ImageUploadException("Image file is empty");
-            }
-
-            String publicId = getPublicIdPrefix() + productId;
-
-            log.info("Cloudinary Public ID: " + publicId);
-
-            Transformation<?> transformation = new Transformation<>()
-                    .width(800)
-                    .height(800)
-                    .crop("limit")
-                    .quality(80);
-
-            Map<?, ?> uploadResult = config.cloudinary().uploader()
-                    .upload(imageFile.getBytes(), ObjectUtils.asMap("public_id", "ec", "transformation", transformation));
-
-            String imageURL = uploadResult.get("url").toString();
-
-            if (StringUtils.isEmpty(imageURL)) {
-                throw new ImageUploadException("Failed to retrieve image URL");
-            }
-
-            return imageURL;
+            Map<?, ?> uploadResult = config.cloudinary().uploader().upload(imageFile.getBytes(), ObjectUtils.asMap(
+                    "public_id", getPublicIdPrefix() + productId,
+                    "timestamp", String.valueOf(System.currentTimeMillis()),
+                    "use_filename", true,
+                    "unique_filename", false,
+                    "overwrite", true
+            ));
+            return String.valueOf(uploadResult.get("secure-url"));
         } catch (IOException e) {
-            throw new ImageUploadException("Failed to upload image" + e.getMessage());
+            throw new ImageUploadException("Error uploading image" + e.getMessage());
         }
     }
 

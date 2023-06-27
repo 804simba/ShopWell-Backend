@@ -1,5 +1,6 @@
 package com.shopwell.api.model.VOs.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -38,5 +39,6 @@ public class ProductRegistrationVO implements Serializable {
     private String quantityAvailable;
 
     @Size(min = 1, max = 10, message = "Product should have minimum 1 image and maximum 5 images")
+    @JsonIgnore
     private List<MultipartFile> imageFiles;
 }
