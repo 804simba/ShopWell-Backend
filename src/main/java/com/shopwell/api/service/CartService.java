@@ -1,6 +1,7 @@
 package com.shopwell.api.service;
 
 import com.shopwell.api.model.VOs.request.CartItemVO;
+import com.shopwell.api.model.VOs.response.CartItemResponseVO;
 import com.shopwell.api.model.entity.Product;
 
 import java.math.BigDecimal;
@@ -12,7 +13,7 @@ public interface CartService {
 
     String removeProductFromCart(Product product, Long customerId);
 
-    List<CartItemVO> getCartItems(Long customerId);
+    List<CartItemResponseVO> getCartItems(Long customerId);
 
     Double calculateTotalPrice(Long customerId);
 }

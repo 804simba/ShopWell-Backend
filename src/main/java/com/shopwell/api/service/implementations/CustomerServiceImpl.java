@@ -48,7 +48,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .customerEmail(customerRegistrationVO.getCustomerEmail())
                 .customerPhoneNumber(customerRegistrationVO.getCustomerPhoneNumber())
                 .customerCity(customerRegistrationVO.getCustomerCity())
-                .customerDateOfBirth(DateUtils.getTimestamp(customerRegistrationVO.getCustomerDateOfBirth()))
+                .customerDateOfBirth(DateUtils.getDate(customerRegistrationVO.getCustomerDateOfBirth()))
                 .customerStreetAddress(customerRegistrationVO.getCustomerStreetAddress())
                 .build();
     }

@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -40,7 +41,7 @@ public class Employee {
 
     @Temporal(TemporalType.DATE)
     @Column(name = "employee_dob")
-    private Timestamp employeeDateOfBirth;
+    private Date employeeDateOfBirth;
 
     @Column(name = "employee_phone_number")
     private String employeePhoneNumber;

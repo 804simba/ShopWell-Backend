@@ -1,5 +1,6 @@
 package com.shopwell.api.utils;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -18,9 +19,8 @@ public class DateUtils {
         return LocalDate.parse(date, formatter);
     }
 
-    public static Timestamp getTimestamp(String date) {
+    public static Date getDate(String date) {
         LocalDate localDate = LocalDate.parse(date);
-        Instant instant = localDate.atStartOfDay().toInstant(ZoneOffset.UTC);
-        return Timestamp.from(instant);
+        return Date.valueOf(localDate);
     }
 }

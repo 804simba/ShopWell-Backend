@@ -2,7 +2,9 @@ package com.shopwell.api.controller;
 
 import com.shopwell.api.model.VOs.request.AddToCartRequestVO;
 import com.shopwell.api.model.VOs.request.CartItemVO;
+import com.shopwell.api.model.VOs.request.RemoveFromCartRequest;
 import com.shopwell.api.model.VOs.response.ApiResponseVO;
+import com.shopwell.api.model.VOs.response.CartItemResponseVO;
 import com.shopwell.api.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,18 +31,17 @@ public class CartController {
     }
 
     @DeleteMapping("/remove")
-    public ResponseEntity<ApiResponseVO<?>> removeProductFromCart(@RequestParam("productId") final Long productId,
-                                                                  @RequestParam("customerId") final Long customerId) {
-        log.info(String.format("Removing product %d from cart: ", productId));
-        productService.removeProductFromCart(productId, customerId);
-        ApiResponseVO<?> response = new ApiResponseVO<>("Product removed from cart successfully", null);
+    public ResponseEntity<ApiResponseVO<?>> removeProductFromCart(@RequestBody final RemoveFromCartRequest removeFromCartRequest) {
+        log.info("Removing product from cart: ");
+        productService.removeProductFromCart(removeFromCartRequest.getProductId(), removeFromCartRequest.getCustomerId());
+        ApiResponseVO<?> response = new ApiResponseVO<>("Product removed from cart successfully");
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponseVO<List<CartItemVO>>> getCartItems(@RequestParam("customerId") final Long customerId) {
+    public ResponseEntity<ApiResponseVO<List<CartItemResponseVO>>> getCartItems(@RequestParam("customerId") final Long customerId) {
         log.info(String.format("Fetching cart items of customerID: %d: ", customerId));
-        ApiResponseVO<List<CartItemVO>> response = new ApiResponseVO<>("", productService.getCartItems(customerId));
+        ApiResponseVO<List<CartItemResponseVO>> response = new ApiResponseVO<>(productService.getCartItems(customerId));
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
