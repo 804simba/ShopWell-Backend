@@ -14,8 +14,13 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
 
     @Override
-    public void registerCategory(CategoryRegistrationVO categoryRegistrationVO) {
-        categoryRepository.save(mapCategoryRegistrationVO(categoryRegistrationVO));
+    public Category registerCategory(CategoryRegistrationVO categoryRegistrationVO) {
+        return categoryRepository.save(mapCategoryRegistrationVO(categoryRegistrationVO));
+    }
+
+    @Override
+    public Category findProductByCategory(String categoryName) {
+        return categoryRepository.findByCategoryName(categoryName).orElse(null);
     }
 
     private Category mapCategoryRegistrationVO(CategoryRegistrationVO categoryRegistrationVO) {

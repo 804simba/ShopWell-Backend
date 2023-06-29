@@ -3,7 +3,9 @@ package com.shopwell.api.service;
 import com.shopwell.api.exceptions.ProductNotFoundException;
 import com.shopwell.api.model.VOs.request.*;
 import com.shopwell.api.model.VOs.response.ApiResponseVO;
+import com.shopwell.api.model.VOs.response.ProductResponseVO;
 import com.shopwell.api.model.VOs.response.ProductSearchResponseVO;
+import com.shopwell.api.model.entity.Product;
 import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
@@ -28,4 +30,6 @@ public interface ProductService {
     List<CartItemVO> getCartItems(Long customerId);
 
     Double calculateTotalPrice(Long customerId);
+
+    ApiResponseVO<?> getProducts();
 }

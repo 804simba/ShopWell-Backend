@@ -2,10 +2,7 @@ package com.shopwell.api.service.implementations;
 
 import com.shopwell.api.exceptions.ImageUploadException;
 import com.shopwell.api.exceptions.ProductNotFoundException;
-import com.shopwell.api.model.VOs.request.AddToCartRequestVO;
-import com.shopwell.api.model.VOs.request.CartItemVO;
-import com.shopwell.api.model.VOs.request.ProductRegistrationVO;
-import com.shopwell.api.model.VOs.request.ProductSearchRequestVO;
+import com.shopwell.api.model.VOs.request.*;
 import com.shopwell.api.model.VOs.response.ApiResponseVO;
 import com.shopwell.api.model.VOs.response.ProductResponseVO;
 import com.shopwell.api.model.VOs.response.ProductSearchResponseVO;
@@ -13,21 +10,18 @@ import com.shopwell.api.model.entity.Brand;
 import com.shopwell.api.model.entity.Category;
 import com.shopwell.api.model.entity.Product;
 import com.shopwell.api.model.entity.ProductImage;
-import com.shopwell.api.repository.BrandRepository;
-import com.shopwell.api.repository.CategoryRepository;
-import com.shopwell.api.repository.ProductImageRepository;
 import com.shopwell.api.repository.ProductRepository;
+import com.shopwell.api.service.BrandService;
 import com.shopwell.api.service.CartService;
+import com.shopwell.api.service.CategoryService;
 import com.shopwell.api.service.ProductService;
 import com.shopwell.api.service.image.ProductImageService;
+import com.shopwell.api.utils.PageUtils;
 import com.shopwell.api.utils.search.ProductSpecificationBuilder;
 import com.shopwell.api.utils.search.SearchCriteria;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -40,11 +34,9 @@ import java.util.stream.Collectors;
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
 
-    private final BrandRepository brandRepository;
+    private final BrandService brandService;
 
-    private final CategoryRepository categoryRepository;
-
-    private final ProductImageRepository productImageRepository;
+    private final CategoryService categoryService;
 
     private final CartService cartService;
 
@@ -61,6 +53,8 @@ public class ProductServiceImpl implements ProductService {
 
             List<String> imageURLs = saveProductImages(savedProduct, imageFiles);
             savedProduct.setProductImageURLs(mapToProductImages(imageURLs));
+            productRepository.save(savedProduct);
+
             return ApiResponseVO.builder()
                     .message("Product saved successfully")
                     .payload(productRegistrationVO)
@@ -71,6 +65,19 @@ public class ProductServiceImpl implements ProductService {
                     .message(String.format("Product was not saved:: %s", e.getMessage()))
                     .build();
         }
+    }
+
+    @Override
+    public ApiResponseVO<?> getProducts() {
+        Pageable pageable = PageRequest.of(PageUtils.DEFAULT_PAGE_NUMBER, PageUtils.DEFAULT_PAGE_SIZE);
+        Page<Product> productPage = productRepository.findAll(pageable);
+
+        List<ProductResponseVO> products = productPage.getContent().stream()
+                .map(this::mapProductToVO).collect(Collectors.toList());
+
+        return ApiResponseVO.builder()
+                .payload(new PageImpl<>(products, pageable, productPage.getTotalElements()))
+                .build();
     }
 
     @Override
@@ -85,13 +92,27 @@ public class ProductServiceImpl implements ProductService {
             foundProduct.setProductPrice(Double.parseDouble(productRegistrationVO.getProductPrice()));
             foundProduct.setQuantityAvailable(Integer.parseInt(productRegistrationVO.getQuantityAvailable()));
 
-            Brand brand = brandRepository.findByBrandName(productRegistrationVO.getBrandName());
+            Brand brand = brandService.findProductByBrandName(productRegistrationVO.getBrandName());
+
+            if (brand == null) {
+                Brand newBrand = Brand.builder()
+                        .brandName(productRegistrationVO.getBrandName())
+                        .build();
+                brand = brandService.registerBrand(new BrandRegistrationVO(newBrand.getBrandName()));
+            }
 
             foundProduct.setBrand(brand);
 
-            List<MultipartFile> imageFiles = productRegistrationVO.getImageFiles();
-            List<String> imageURLs = saveProductImages(foundProduct, imageFiles);
-            foundProduct.setProductImageURLs(mapToProductImages(imageURLs));
+            Category category = categoryService.findProductByCategory(productRegistrationVO.getCategoryName());
+
+            if (category == null) {
+                Category newCategory = Category.builder()
+                        .categoryName(productRegistrationVO.getCategoryName())
+                        .build();
+                category = categoryService.registerCategory(new CategoryRegistrationVO(newCategory.getCategoryName()));
+            }
+
+            foundProduct.setCategory(category);
 
             var savedProduct = productRepository.save(foundProduct);
 
@@ -100,7 +121,14 @@ public class ProductServiceImpl implements ProductService {
                     .payload(mapProductToVO(savedProduct))
                     .build();
         } catch (ProductNotFoundException e) {
-            throw new RuntimeException(e.getMessage());
+            return ApiResponseVO.builder()
+                    .message(e.getMessage())
+                    .build();
+
+        } catch (Exception e) {
+            return ApiResponseVO.builder()
+                    .message(String.format("Product update failed: %s", e.getMessage()))
+                    .build();
         }
     }
 
@@ -192,17 +220,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private Product mapProductRegistrationVOToProduct(ProductRegistrationVO productRegistrationVO) {
-        Brand brand = Brand.builder()
-                .brandName(productRegistrationVO.getBrandName())
-                .build();
 
-        brandRepository.save(brand);
+        Brand brand = brandService.registerBrand(new BrandRegistrationVO(productRegistrationVO.getBrandName()));
 
-        Category category = Category.builder()
-                .categoryName(productRegistrationVO.getCategoryName())
-                .build();
-
-        categoryRepository.save(category);
+        Category category = categoryService.registerCategory(new CategoryRegistrationVO(productRegistrationVO.getCategoryName()));
 
         return Product.builder()
                 .productName(productRegistrationVO.getProductName())
@@ -244,12 +265,16 @@ public class ProductServiceImpl implements ProductService {
                 try {
                     String imageURL = productImageService.uploadImage(product.getProductNumber(), imageFile);
                     imageURLs.add(imageURL);
-                    productImages.add(ProductImage.builder().imageUrl(imageURL).build());
+                    ProductImage productImage = ProductImage.builder()
+                            .imageUrl(imageURL)
+                            .product(product)
+                            .build();
+                    productImages.add(productImage);
                 } catch (ImageUploadException e) {
                     throw new RuntimeException("Could not upload image");
                 }
             }
-            productImageRepository.saveAll(productImages);
+            product.setProductImageURLs(productImages);
         }
         return imageURLs;
     }

@@ -19,7 +19,7 @@ import java.util.List;
 public class ProductRegistrationVO implements Serializable {
     @NotNull
     @NotEmpty
-    @Size(min = 5, max = 20)
+    @Size(min = 5, max = 50)
     private String productName;
 
     @NotEmpty(message = "Enter product description")

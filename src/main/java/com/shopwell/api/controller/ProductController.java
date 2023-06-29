@@ -25,21 +25,35 @@ public final class ProductController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponseVO<?>> saveProduct(@Valid @ModelAttribute final ProductRegistrationVO registrationVO) {
         log.info("Saving product: " + registrationVO);
-        ApiResponseVO<?> response = new ApiResponseVO<>("null", productService.saveProduct(registrationVO));
+        ApiResponseVO<?> response = new ApiResponseVO<>(productService.saveProduct(registrationVO));
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @PutMapping(consumes = "multipart/form-data")
-    public ResponseEntity<ApiResponseVO<?>> editProduct(final Long productId, @RequestPart final ProductRegistrationVO registrationVO) throws ProductNotFoundException {
+    @PutMapping(value = "/{productId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponseVO<?>> editProduct(@PathVariable("productId") final Long productId, @ModelAttribute final ProductRegistrationVO registrationVO) throws ProductNotFoundException {
         log.info("Editing product: " + registrationVO);
-        ApiResponseVO<?> response = new ApiResponseVO<>("null", productService.editProduct(productId, registrationVO));
+        ApiResponseVO<?> response = new ApiResponseVO<>(productService.editProduct(productId, registrationVO));
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{productId}")
+    public ResponseEntity<ApiResponseVO<?>> deleteProduct(@PathVariable("productId") final Long productId) throws ProductNotFoundException {
+        log.info("Deleting product with id: " + productId);
+        ApiResponseVO<?> response = new ApiResponseVO<>("null", productService.deleteProduct(productId));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/{productId}")
-    public ResponseEntity<ApiResponseVO<?>> deleteProduct(@PathVariable("productId") final Long productId) throws ProductNotFoundException {
-        log.info("Deleting product with id: " + productId);
-        ApiResponseVO<?> response = new ApiResponseVO<>("null", productService.deleteProduct(productId));
+    public ResponseEntity<ApiResponseVO<?>> getProductById(@PathVariable("productId") final Long productId) throws ProductNotFoundException {
+        log.info("Getting product with id: " + productId);
+        ApiResponseVO<?> response = new ApiResponseVO<>("null", productService.getProduct(productId));
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponseVO<?>> getProducts() {
+        log.info("Getting products");
+        ApiResponseVO<?> response = new ApiResponseVO<>("null", productService.getProducts());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

@@ -9,12 +9,10 @@ import com.shopwell.api.exceptions.ImageUploadException;
 import com.shopwell.api.service.ImageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Map;
 
 @Service
@@ -26,14 +24,25 @@ public class CloudinaryImageServiceImpl<T> implements ImageService<T> {
     @Override
     public String uploadImage(Long productId, MultipartFile imageFile) {
         try {
+            if (imageFile.isEmpty()) {
+                throw new ImageUploadException("No image file");
+            }
+
+            Transformation<?> transformation = new Transformation<>()
+                    .width(400)
+                    .height(400)
+                    .crop("limit")
+                    .quality(80);
+
             Map<?, ?> uploadResult = config.cloudinary().uploader().upload(imageFile.getBytes(), ObjectUtils.asMap(
                     "public_id", getPublicIdPrefix() + productId,
+                    "transformation", transformation,
                     "timestamp", String.valueOf(System.currentTimeMillis()),
                     "use_filename", true,
                     "unique_filename", false,
                     "overwrite", true
             ));
-            return String.valueOf(uploadResult.get("secure-url"));
+            return String.valueOf(uploadResult.get("url"));
         } catch (IOException e) {
             throw new ImageUploadException("Error uploading image" + e.getMessage());
         }
