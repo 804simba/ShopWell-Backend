@@ -3,7 +3,6 @@ package com.shopwell.api.controller;
 import com.shopwell.api.exceptions.CustomerNotFoundException;
 import com.shopwell.api.model.VOs.request.CustomerEmailRequestVO;
 import com.shopwell.api.model.VOs.request.CustomerRegistrationVO;
-import com.shopwell.api.model.VOs.request.EmployeeRegistrationVO;
 import com.shopwell.api.model.VOs.response.ApiResponseVO;
 import com.shopwell.api.model.VOs.response.CustomerResponseVO;
 import com.shopwell.api.service.CustomerService;
