@@ -24,4 +24,8 @@ public class ApiResponseVO<T> {
         this.time = DateUtils.saveDate(LocalDateTime.now());
         this.payload = payload;
     }
+
+    public ApiResponseVO(T payload) {
+        this(null, payload);
+    }
 }

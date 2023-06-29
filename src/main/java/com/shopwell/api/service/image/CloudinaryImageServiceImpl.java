@@ -25,31 +25,26 @@ public class CloudinaryImageServiceImpl<T> implements ImageService<T> {
     public String uploadImage(Long productId, MultipartFile imageFile) {
         try {
             if (imageFile.isEmpty()) {
-                throw new ImageUploadException("Image file is empty");
+                throw new ImageUploadException("No image file");
             }
 
-            String publicId = getPublicIdPrefix() + productId;
-
-            log.info("Cloudinary Public ID: " + publicId);
-
             Transformation<?> transformation = new Transformation<>()
-                    .width(800)
-                    .height(800)
+                    .width(400)
+                    .height(400)
                     .crop("limit")
                     .quality(80);
 
-            Map<?, ?> uploadResult = config.cloudinary().uploader()
-                    .upload(imageFile.getBytes(), ObjectUtils.asMap("public_id", "ec", "transformation", transformation));
-
-            String imageURL = uploadResult.get("url").toString();
-
-            if (StringUtils.isEmpty(imageURL)) {
-                throw new ImageUploadException("Failed to retrieve image URL");
-            }
-
-            return imageURL;
+            Map<?, ?> uploadResult = config.cloudinary().uploader().upload(imageFile.getBytes(), ObjectUtils.asMap(
+                    "public_id", getPublicIdPrefix() + productId,
+                    "transformation", transformation,
+                    "timestamp", String.valueOf(System.currentTimeMillis()),
+                    "use_filename", true,
+                    "unique_filename", false,
+                    "overwrite", true
+            ));
+            return String.valueOf(uploadResult.get("url"));
         } catch (IOException e) {
-            throw new ImageUploadException("Failed to upload image" + e.getMessage());
+            throw new ImageUploadException("Error uploading image" + e.getMessage());
         }
     }
 
