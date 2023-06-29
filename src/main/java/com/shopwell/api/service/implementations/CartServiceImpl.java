@@ -1,10 +1,8 @@
 package com.shopwell.api.service.implementations;
 
 import com.shopwell.api.model.VOs.request.CartItemVO;
-import com.shopwell.api.model.entity.Cart;
-import com.shopwell.api.model.entity.CartItem;
-import com.shopwell.api.model.entity.Customer;
-import com.shopwell.api.model.entity.Product;
+import com.shopwell.api.model.VOs.response.CartItemResponseVO;
+import com.shopwell.api.model.entity.*;
 import com.shopwell.api.repository.CartItemRepository;
 import com.shopwell.api.repository.CartRepository;
 import com.shopwell.api.repository.CustomerRepository;
@@ -56,12 +54,12 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public List<CartItemVO> getCartItems(Long customerId) {
+    public List<CartItemResponseVO> getCartItems(Long customerId) {
         Cart cart = getOrCreateCart(customerId);
         List<CartItem> cartItems = cart.getCartItems();
 
         return cartItems.stream()
-                .map(this::mapToCartItemVO)
+                .map(this::mapToCartItemResponse)
                 .collect(Collectors.toList());
     }
 
@@ -98,12 +96,20 @@ public class CartServiceImpl implements CartService {
                 });
     }
 
-    private CartItemVO mapToCartItemVO(CartItem cartItem) {
-        return CartItemVO.builder()
+    private CartItemResponseVO mapToCartItemResponse(CartItem cartItem) {
+        List<ProductImage> productImages = cartItem.getProduct().getProductImageURLs();
+        String productImageURL = "";
+
+        if (!productImages.isEmpty()) {
+            productImageURL = productImages.get(0).getImageUrl();
+        }
+
+        return CartItemResponseVO.builder()
                 .productId(cartItem.getProduct().getProductNumber())
                 .productName(cartItem.getProduct().getProductName())
                 .quantity(cartItem.getCartItemQuantity())
-                .price(String.valueOf(cartItem.getProduct().getProductPrice()))
+                .productPrice(String.valueOf(cartItem.getProduct().getProductPrice()))
+                .productImage(productImageURL)
                 .build();
     }
 }

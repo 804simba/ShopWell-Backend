@@ -4,6 +4,7 @@ import com.shopwell.api.exceptions.ImageUploadException;
 import com.shopwell.api.exceptions.ProductNotFoundException;
 import com.shopwell.api.model.VOs.request.*;
 import com.shopwell.api.model.VOs.response.ApiResponseVO;
+import com.shopwell.api.model.VOs.response.CartItemResponseVO;
 import com.shopwell.api.model.VOs.response.ProductResponseVO;
 import com.shopwell.api.model.VOs.response.ProductSearchResponseVO;
 import com.shopwell.api.model.entity.Brand;
@@ -210,7 +211,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<CartItemVO> getCartItems(Long customerId) {
+    public List<CartItemResponseVO> getCartItems(Long customerId) {
         return cartService.getCartItems(customerId);
     }
 

@@ -19,7 +19,7 @@ public class CartItemResponseVO {
 
     private String productName;
 
-    private BigDecimal productPrice;
+    private String productPrice;
 
     private int quantity;
 

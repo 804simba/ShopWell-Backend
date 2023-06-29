@@ -24,7 +24,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .employeeFirstName(registration.getEmployeeFirstName())
                 .employeeLastName(registration.getEmployeeLastName())
                 .employeeEmail(registration.getEmployeeEmail())
-                .employeeDateOfBirth(DateUtils.getTimestamp(registration.getEmployeeDateOfBirth()))
+                .employeeDateOfBirth(DateUtils.getDate(registration.getEmployeeDateOfBirth()))
                 .employeeCity(registration.getEmployeeCity())
                 .employeeStreetAddress(registration.getEmployeeStreetAddress())
                 .employeePhoneNumber(registration.getEmployeePhoneNumber())
