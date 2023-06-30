@@ -33,7 +33,4 @@ public class OrderItem {
 
     @Column(name = "quantity_ordered")
     private Integer quantityOrdered;
-
-    @Column(name = "delivery_date")
-    private String deliveryDate;
 }

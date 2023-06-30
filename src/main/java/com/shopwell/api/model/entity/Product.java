@@ -3,7 +3,6 @@ package com.shopwell.api.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
@@ -47,7 +46,4 @@ public class Product {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "brand_id", referencedColumnName = "brand_id")
     private Brand brand;
-
-    @OneToMany(fetch = FetchType.LAZY)
-    private List<Vendor> productVendors;
 }

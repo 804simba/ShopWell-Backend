@@ -22,11 +22,10 @@ public class OrderController {
 
     private final OrderService orderService;
 
-    @PostMapping("/{customerId}")
-    public ResponseEntity<OrderResponseVO> placeOrder(@PathVariable("customerId") final Long customerId,
-                                                      @RequestBody @Valid final OrderRequestVO orderRequestVO) throws CustomerNotFoundException {
-        log.info(String.format("Placing order for customer %d: order %s: ", customerId, orderRequestVO.toString()));
-        OrderResponseVO response = orderService.placeOrder(customerId, orderRequestVO);
+    @PostMapping("/place-order")
+    public ResponseEntity<OrderResponseVO> placeOrder(@RequestBody @Valid final OrderRequestVO orderRequestVO) throws CustomerNotFoundException {
+        log.info(String.format("Placing order for customer %d: order %s: ", orderRequestVO.getCustomerId(), orderRequestVO));
+        OrderResponseVO response = orderService.placeOrder(orderRequestVO.getCustomerId(), orderRequestVO);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

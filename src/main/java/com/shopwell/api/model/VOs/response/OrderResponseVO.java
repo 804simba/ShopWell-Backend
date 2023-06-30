@@ -1,6 +1,5 @@
 package com.shopwell.api.model.VOs.response;
 
-import com.shopwell.api.model.VOs.request.OrderRequestVO.OrderItemVO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

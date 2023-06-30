@@ -1,6 +1,5 @@
 package com.shopwell.api.service.implementations;
 
-import com.shopwell.api.model.VOs.request.CartItemVO;
 import com.shopwell.api.model.VOs.response.CartItemResponseVO;
 import com.shopwell.api.model.entity.*;
 import com.shopwell.api.repository.CartItemRepository;
@@ -33,9 +32,10 @@ public class CartServiceImpl implements CartService {
             cartItem = new CartItem();
             cartItem.setProduct(product);
             cartItem.setCart(cart);
-            cartItem.setCartItemQuantity(quantity);
+            cartItem.setQuotedPrice(BigDecimal.valueOf(product.getProductPrice()));
+            cartItem.setQuantityOrdered(quantity);
         } else {
-            cartItem.setCartItemQuantity(cartItem.getCartItemQuantity() + quantity);
+            cartItem.setQuantityOrdered(cartItem.getQuantityOrdered() + quantity);
         }
 
         cartItemRepository.save(cartItem);
@@ -72,7 +72,7 @@ public class CartServiceImpl implements CartService {
 
         for (CartItem cartItem : cartItems) {
             Double productPrice = cartItem.getProduct().getProductPrice();
-            int quantity = cartItem.getCartItemQuantity();
+            int quantity = cartItem.getQuantityOrdered();
             double itemPrice = productPrice * quantity;
             totalPrice = totalPrice + itemPrice;
         }
@@ -107,7 +107,7 @@ public class CartServiceImpl implements CartService {
         return CartItemResponseVO.builder()
                 .productId(cartItem.getProduct().getProductNumber())
                 .productName(cartItem.getProduct().getProductName())
-                .quantity(cartItem.getCartItemQuantity())
+                .quantity(cartItem.getQuantityOrdered())
                 .productPrice(String.valueOf(cartItem.getProduct().getProductPrice()))
                 .productImage(productImageURL)
                 .build();
