@@ -25,13 +25,9 @@ public class Order {
     @Column(name = "order_id")
     private Long orderId;
 
-    @Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "order_date")
     private Timestamp orderDate;
-
-    @Temporal(TemporalType.DATE)
-    @Column(name = "order_ship_date")
-    private Timestamp shipDate;
 
     @Column(name = "order_total")
     private BigDecimal orderTotal;
@@ -49,10 +45,6 @@ public class Order {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", referencedColumnName = "customer_id")
     private Customer customer;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "employee_id", referencedColumnName = "employee_id")
-    private Employee employee;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems;

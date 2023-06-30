@@ -1,22 +1,23 @@
 package com.shopwell.api.service.implementations;
 
+import com.shopwell.api.exceptions.CartNotFoundException;
 import com.shopwell.api.exceptions.CustomerNotFoundException;
-import com.shopwell.api.exceptions.ProductNotFoundException;
 import com.shopwell.api.model.VOs.request.OrderRequestVO;
-import com.shopwell.api.model.VOs.request.OrderRequestVO.OrderItemVO;
+import com.shopwell.api.model.VOs.response.OrderItemVO;
 import com.shopwell.api.model.VOs.response.OrderResponseVO;
-import com.shopwell.api.model.entity.Customer;
-import com.shopwell.api.model.entity.Order;
-import com.shopwell.api.model.entity.OrderItem;
-import com.shopwell.api.model.entity.Product;
+import com.shopwell.api.model.entity.*;
 import com.shopwell.api.model.enums.OrderStatus;
+import com.shopwell.api.repository.CartRepository;
 import com.shopwell.api.repository.CustomerRepository;
 import com.shopwell.api.repository.OrderRepository;
-import com.shopwell.api.repository.ProductRepository;
+import com.shopwell.api.service.CartService;
 import com.shopwell.api.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,8 +26,9 @@ import java.util.stream.Collectors;
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
+    private final CartRepository cartRepository;
     private final CustomerRepository customerRepository;
-    private final ProductRepository productRepository;
+    private final CartService cartService;
 
     @Override
     public OrderResponseVO placeOrder(Long customerId, OrderRequestVO orderRequestVO) {
@@ -34,23 +36,34 @@ public class OrderServiceImpl implements OrderService {
             Customer foundCustomer = customerRepository.findById(customerId)
                     .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
 
+            Cart cart = cartRepository.findCartByCustomer(foundCustomer)
+                    .orElseThrow(() -> new CartNotFoundException("Cart not found"));
+            List<CartItem> cartItems = cart.getCartItems();
+
             Order order = new Order();
             order.setShippingAddress(orderRequestVO.getShippingAddress());
             order.setPaymentMethod(orderRequestVO.getPaymentMethod());
 
-            List<OrderItem> orderItems = orderRequestVO.getOrderItems().stream()
-                    .map(this::mapOrderItemVO).collect(Collectors.toList());
+            List<OrderItem> orderItems = cartItems.stream()
+                    .map(this::mapCartItem).collect(Collectors.toList());
+
+            orderItems.forEach(orderItem -> orderItem.setOrder(order));
 
             order.setOrderItems(orderItems);
+            order.setOrderDate(Timestamp.from(Instant.now()));
+            order.setOrderStatus(OrderStatus.PENDING);
+            order.setCustomer(foundCustomer);
 
-            foundCustomer.getOrders().add(order);
-            customerRepository.save(foundCustomer);
+            Double totalCostOfGoods = cartService.calculateTotalPrice(customerId);
+
+            order.setOrderTotal(BigDecimal.valueOf(totalCostOfGoods));
+
+            orderRepository.save(order);
 
             return OrderResponseVO.builder()
                     .orderId(order.getOrderId())
                     .orderDate(order.getOrderDate().toString())
                     .orderStatus(OrderStatus.PENDING.name())
-                    .orderItems(orderRequestVO.getOrderItems())
                     .build();
 
         } catch (CustomerNotFoundException e) {
@@ -105,30 +118,20 @@ public class OrderServiceImpl implements OrderService {
         return "Order status updated";
     }
 
-    private OrderItem mapOrderItemVO(OrderItemVO orderItemVO) {
-        try {
+    private OrderItem mapCartItem(CartItem cartItem) {
             OrderItem orderItem = new OrderItem();
-            orderItem.setQuotedPrice(orderItemVO.getProductPrice());
-            orderItem.setQuantityOrdered(orderItem.getQuantityOrdered());
-            orderItem.setDeliveryDate(orderItemVO.getDeliveryDate());
-
-            Product product = productRepository.findById(orderItemVO.getProductId())
-                    .orElseThrow(() -> new ProductNotFoundException("Product not found"));
-
-            orderItem.setProduct(product);
+            orderItem.setQuotedPrice(cartItem.getQuotedPrice());
+            orderItem.setQuantityOrdered(cartItem.getQuantityOrdered());
+            orderItem.setProduct(cartItem.getProduct());
 
             return orderItem;
-        } catch (ProductNotFoundException e) {
-            throw new RuntimeException("Product not found");
-        }
     }
 
     private OrderItemVO mapOrderItem(OrderItem orderItem) {
         return OrderItemVO.builder()
                 .productId(orderItem.getProduct().getProductNumber())
-                .productPrice(orderItem.getQuotedPrice())
-                .deliveryDate(orderItem.getDeliveryDate())
-                .quantity(orderItem.getQuantityOrdered())
+                .productPrice(String.valueOf(orderItem.getQuotedPrice()))
+                .quantityOrdered(String.valueOf(orderItem.getQuantityOrdered()))
                 .build();
     }
 }

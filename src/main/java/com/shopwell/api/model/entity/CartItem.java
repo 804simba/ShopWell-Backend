@@ -3,6 +3,8 @@ package com.shopwell.api.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "cart_items")
 @Getter
@@ -29,5 +31,9 @@ public class CartItem {
     @JoinColumn(name = "product_id", referencedColumnName = "product_id")
     private Product product;
 
-    private Integer cartItemQuantity;
+    @Column(name = "quoted_price")
+    private BigDecimal quotedPrice;
+
+    @Column(name = "quantity_ordered")
+    private Integer quantityOrdered;
 }
