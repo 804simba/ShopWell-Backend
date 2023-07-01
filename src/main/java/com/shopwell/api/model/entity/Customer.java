@@ -1,16 +1,21 @@
 package com.shopwell.api.model.entity;
 
+import com.shopwell.api.model.enums.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Entity
@@ -26,7 +31,7 @@ import java.util.List;
                 @UniqueConstraint(name = "guardianMobile_unique", columnNames = "customer_phone_number")
         }
 )
-public class Customer {
+public class Customer implements UserDetails {
     @Id
     @GeneratedValue(
             strategy = GenerationType.IDENTITY
@@ -42,6 +47,8 @@ public class Customer {
 
     @Column(name = "customer_email")
     private String customerEmail;
+    @Column(name = "customer_password")
+    private String customerPassword;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "customer_dob")
@@ -55,7 +62,50 @@ public class Customer {
 
     @Column(name = "customer_city")
     private String customerCity;
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<Order> orders = new ArrayList<>();
+
+    public Customer(String customerEmail, String password) {
+        this.customerEmail=customerEmail;
+        this.customerPassword=password;
+
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(role.name()));
+    }
+
+    @Override
+    public String getPassword() {
+        return customerPassword;
+    }
+
+    @Override
+    public String getUsername() {
+        return customerEmail;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }
