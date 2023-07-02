@@ -2,11 +2,10 @@ package com.shopwell.api.model.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.io.Serializable;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -14,7 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,7 +26,8 @@ import java.util.List;
                 @UniqueConstraint(name = "guardianMobile_unique", columnNames = "customer_phone_number")
         }
 )
-public class Customer {
+@EntityListeners(AuditingEntityListener.class)
+public class Customer extends BaseEntity implements Serializable {
     @Id
     @GeneratedValue(
             strategy = GenerationType.IDENTITY
