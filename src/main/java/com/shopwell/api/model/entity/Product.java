@@ -2,6 +2,7 @@ package com.shopwell.api.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.List;
 
@@ -15,7 +16,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Product {
+@EntityListeners(AuditingEntityListener.class)
+public class Product extends BaseEntity {
     @Id
     @GeneratedValue(
             strategy = GenerationType.IDENTITY
