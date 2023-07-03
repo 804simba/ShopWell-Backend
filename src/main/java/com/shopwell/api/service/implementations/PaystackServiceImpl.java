@@ -71,7 +71,7 @@ public class PaystackServiceImpl implements PaystackService {
                     result.append(line);
                 }
             } else {
-                throw new Exception("Paystack failed to process payment at the mooment");
+                throw new Exception("Paystack failed to process payment at the moment");
             }
 
             ObjectMapper mapper = new ObjectMapper();
@@ -134,7 +134,7 @@ public class PaystackServiceImpl implements PaystackService {
             throw new Exception("Reference, plan and id must be provided in path.");
         }
 
-        PaymentVerificationResponse paymentVerificationResponse = null;
+        PaymentVerificationResponse paymentVerificationResponse;
         PaymentPaystack paymentPaystack = null;
 
         try {
@@ -168,7 +168,7 @@ public class PaystackServiceImpl implements PaystackService {
 
             if (paymentVerificationResponse == null || paymentVerificationResponse.getData().getStatus().equals("false")) {
                 throw new Exception("An error occurred while verifying payment from Paystack");
-            } else if (paymentVerificationResponse.getStatus().equals("success")) {
+            } else if (paymentVerificationResponse.getData().getStatus().equals("success")) {
                 Customer customer = customerRepository.findById(customerId).orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
 
                 PricingPlanType pricingPlanType = PricingPlanType.valueOf(plan.toUpperCase());
