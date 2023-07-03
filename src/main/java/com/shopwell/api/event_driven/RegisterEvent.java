@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.springframework.context.ApplicationEvent;
 @Getter
 @Setter
+
 public class RegisterEvent  extends ApplicationEvent {
     private String otp;
     private Customer customer;

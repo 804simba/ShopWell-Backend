@@ -44,4 +44,11 @@ public class CustomerRegistrationVO {
     @NotEmpty(message = "Enter your city")
     @Size(min = 5, max = 50)
     private String customerCity;
+
+    @NotNull
+    @NotEmpty(message = "Enter your password")
+    private String customerPassword;
+
+
+
 }

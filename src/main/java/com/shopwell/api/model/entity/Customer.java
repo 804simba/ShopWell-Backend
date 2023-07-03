@@ -65,13 +65,15 @@ public class Customer extends BaseEntity implements UserDetails,Serializable {
 
     @Column(name = "customer_street_address")
     private String customerStreetAddress;
+    @Column(name = "customer_status")
+    private Boolean customerStatus;
 
     @Column(name = "customer_city")
     private String customerCity;
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "customer")
     private final List<Order> orders = new ArrayList<>();
 
     public Customer(String customerEmail, String password) {
