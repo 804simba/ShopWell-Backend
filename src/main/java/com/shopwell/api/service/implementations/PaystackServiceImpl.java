@@ -2,6 +2,7 @@ package com.shopwell.api.service.implementations;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.shopwell.api.event_driven.PaymentEvent;
 import com.shopwell.api.exceptions.CustomerNotFoundException;
 import com.shopwell.api.model.VOs.request.paymentDTOs.*;
 import com.shopwell.api.model.entity.Customer;
@@ -20,6 +21,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -34,6 +36,8 @@ public class PaystackServiceImpl implements PaystackService {
     private final PaystackPaymentRepository paystackPaymentRepository;
 
     private final CustomerRepository customerRepository;
+
+    private final ApplicationEventPublisher eventPublisher;
 
     @Value("${applyforme.paystack.secret.key}")
     private String paystackSecretKey;
@@ -67,7 +71,7 @@ public class PaystackServiceImpl implements PaystackService {
 
                 String line;
 
-                while((line = reader.readLine()) != null) {
+                while ((line = reader.readLine()) != null) {
                     result.append(line);
                 }
             } else {
@@ -85,7 +89,7 @@ public class PaystackServiceImpl implements PaystackService {
     }
 
     @Override
-    public InitializePaymentResponse initializePayment(InitializePaymentRequest initializePaymentRequest) throws Exception {
+    public InitializePaymentResponse initializePayment(InitializePaymentRequest initializePaymentRequest) {
         InitializePaymentResponse initializePaymentResponse = null;
 
         try {
@@ -112,7 +116,7 @@ public class PaystackServiceImpl implements PaystackService {
 
                 String line;
 
-                while((line = reader.readLine()) != null) {
+                while ((line = reader.readLine()) != null) {
                     result.append(line);
                 }
             } else {
@@ -136,6 +140,7 @@ public class PaystackServiceImpl implements PaystackService {
 
         PaymentVerificationResponse paymentVerificationResponse;
         PaymentPaystack paymentPaystack = null;
+        Customer customer = null;
 
         try {
             HttpClient client = HttpClientBuilder.create().build();
@@ -169,7 +174,7 @@ public class PaystackServiceImpl implements PaystackService {
             if (paymentVerificationResponse == null || paymentVerificationResponse.getData().getStatus().equals("false")) {
                 throw new Exception("An error occurred while verifying payment from Paystack");
             } else if (paymentVerificationResponse.getData().getStatus().equals("success")) {
-                Customer customer = customerRepository.findById(customerId).orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
+                customer = customerRepository.findById(customerId).orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
 
                 PricingPlanType pricingPlanType = PricingPlanType.valueOf(plan.toUpperCase());
 
@@ -191,6 +196,13 @@ public class PaystackServiceImpl implements PaystackService {
         }
 
         paystackPaymentRepository.save(Objects.requireNonNull(paymentPaystack));
+
+        PaymentEvent paymentEvent = new PaymentEvent(
+                customer,
+                paymentVerificationResponse.getData().getReference(),
+                paymentVerificationResponse.getData().getAmount().toString());
+
+        eventPublisher.publishEvent(paymentEvent);
 
         return paymentVerificationResponse;
     }

@@ -48,7 +48,4 @@ public class CustomerRegistrationVO {
     @NotNull
     @NotEmpty(message = "Enter your password")
     private String customerPassword;
-
-
-
 }
