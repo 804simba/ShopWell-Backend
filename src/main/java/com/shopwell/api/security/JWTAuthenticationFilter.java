@@ -47,11 +47,11 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
             log.info("details {}",userDetails);
-            boolean isTokenValid = tokenRepository.findByToken(jwt)
-                    .map(t -> !t.isExpired() && !t.isRevoked())
-                    .orElse(false);
-            log.info("chekced {}",isTokenValid);
-            if (jwtService.isTokenValid(jwt, userDetails) && isTokenValid) {
+//            boolean isTokenValid = tokenRepository.findByToken(jwt)
+//                    .map(t -> !t.isExpired() && !t.isRevoked())
+//                    .orElse(false);
+//            log.info("chekced {}",isTokenValid);
+            if (jwtService.isTokenValid(jwt, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
