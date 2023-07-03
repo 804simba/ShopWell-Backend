@@ -46,13 +46,7 @@ public class OtpServiceImpl  implements OtpService {
                     .build();
         }
     }
-
-    @Override
-    public ResponseOTPVO resendOtp(String email) {
-        Customer customer = customerRepository.findCustomerByCustomerEmail(email).orElseThrow(()->new RuntimeException("USER NOT FOUND"));
-
-        String otp = RandomValues.generateRandom();
-        OTPConfirmation confirmationToken = new OTPConfirmation(otp, customer);
+    public void sendOtp(Customer customer,String otp,OTPConfirmation confirmationToken){
         System.out.println("****");
         OTPConfirmation otpConfirmation = otpRepository.findId(customer.getCustomerId());
         System.out.println("-----");
@@ -62,6 +56,14 @@ public class OtpServiceImpl  implements OtpService {
         otpRepository.save(confirmationToken);
         System.out.println(otp);
         applicationEventPublisher.publishEvent(new RegisterEvent(customer,otp));
+    }
+
+    @Override
+    public ResponseOTPVO resendOtp(String email) {
+        Customer customer = customerRepository.findCustomerByCustomerEmail(email).orElseThrow(()->new RuntimeException("USER NOT FOUND"));
+        String otp = RandomValues.generateRandom();
+        OTPConfirmation confirmationToken = new OTPConfirmation(otp, customer);
+        sendOtp(customer,otp,confirmationToken);
         return ResponseOTPVO.builder()
                 .message(otp)
                 .localDateTime(LocalDateTime.now())
