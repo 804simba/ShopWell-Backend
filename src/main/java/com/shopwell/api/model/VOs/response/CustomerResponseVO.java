@@ -16,4 +16,5 @@ public class CustomerResponseVO {
     private String lastName;
 
     private String emailAddress;
+    private Object object;
 }

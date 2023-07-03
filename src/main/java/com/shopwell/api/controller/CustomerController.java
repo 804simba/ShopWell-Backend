@@ -7,6 +7,7 @@ import com.shopwell.api.model.VOs.response.ApiResponseVO;
 import com.shopwell.api.model.VOs.response.CustomerResponseVO;
 import com.shopwell.api.service.CustomerService;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,8 +30,9 @@ public class CustomerController {
                 .build());
     }
 
+    @SneakyThrows
     @GetMapping
-    public ResponseEntity<ApiResponseVO<CustomerResponseVO>> getCustomerByEmail(@RequestBody CustomerEmailRequestVO customerEmailRequestVO) throws CustomerNotFoundException {
+    public ResponseEntity<ApiResponseVO<CustomerResponseVO>> getCustomerByEmail(@RequestBody CustomerEmailRequestVO customerEmailRequestVO)  {
         log.info("Getting Customer by email: " + customerEmailRequestVO);
         CustomerResponseVO customer = customerService.findCustomerByEmail(customerEmailRequestVO.getEmail());
 

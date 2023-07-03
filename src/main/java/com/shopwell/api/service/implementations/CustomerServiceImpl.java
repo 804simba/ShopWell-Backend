@@ -27,8 +27,6 @@ public class CustomerServiceImpl implements CustomerService {
     private final ApplicationEventPublisher publisher;
     private final OtpServiceImpl otpService;
 
-    private final OTPRepository otpRepository;
-
 
     @Override
     public ApiResponseVO<?> registerCustomer(CustomerRegistrationVO registrationVO) {
@@ -40,19 +38,10 @@ public class CustomerServiceImpl implements CustomerService {
                 .message("Account created successfully")
                 .payload(customerEntityToVO(saveUser)).build();
     }
-    private String generatingOtp(Customer user)  {
+    private String generatingOtp(Customer customer)  {
         String otp = RandomValues.generateRandom();
-        OTPConfirmation confirmationToken = new OTPConfirmation(otp, user);
-        System.out.println("****");
-        OTPConfirmation otpConfirmation = otpRepository.findId(user.getCustomerId());
-        System.out.println("-----");
-        if (otpConfirmation != null){
-            otpRepository.delete(otpConfirmation);
-        }
-        System.out.println(otpConfirmation);
-        otpRepository.save(confirmationToken);
-        System.out.println(otp);
-
+        OTPConfirmation confirmationToken = new OTPConfirmation(otp, customer);
+        otpService.sendOtp(customer,otp,confirmationToken);
         return otp;
 
     }
