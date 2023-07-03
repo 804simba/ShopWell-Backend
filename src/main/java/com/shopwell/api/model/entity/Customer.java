@@ -10,7 +10,10 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import lombok.*;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.io.Serializable;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -19,7 +22,8 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -32,6 +36,8 @@ import java.util.List;
         }
 )
 public class Customer implements UserDetails {
+@EntityListeners(AuditingEntityListener.class)
+public class Customer extends BaseEntity implements Serializable {
     @Id
     @GeneratedValue(
             strategy = GenerationType.IDENTITY
