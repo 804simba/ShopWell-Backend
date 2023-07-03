@@ -1,7 +1,6 @@
 package com.shopwell.api.security;
 
 
-import com.shopwell.api.repository.JwtTokenRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,7 +23,7 @@ import java.io.IOException;
 public class JWTAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
-    private final JwtTokenRepository tokenRepository;
+
 
     @Override
     protected void doFilterInternal(
