@@ -10,6 +10,7 @@ import java.util.Date;
 
 @Getter
 @Setter
+@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class PaymentVerificationResponse {

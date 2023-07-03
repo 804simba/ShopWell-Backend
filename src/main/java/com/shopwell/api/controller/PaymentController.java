@@ -8,9 +8,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(value = "/payment", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/payments", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
-public class PaystackController {
+public class PaymentController {
     private final PaystackService paystackService;
 
     @PostMapping("/create-plan")
@@ -18,12 +18,12 @@ public class PaystackController {
         return paystackService.createPlan(request);
     }
 
-    @PostMapping("/initialize-payment")
+    @PostMapping("/initialize")
     public InitializePaymentResponse initializePayment(@Validated @RequestBody InitializePaymentRequest request) throws Exception {
         return paystackService.initializePayment(request);
     }
 
-    @GetMapping("/verify-payment/{reference}/{plan}/{customerId}")
+    @GetMapping("/verify/{reference}/{plan}/{customerId}")
     public PaymentVerificationResponse verifyPayment(@PathVariable("reference") final String reference,
                                                      @PathVariable("plan") final String plan,
                                                      @PathVariable("customerId") final Long customerId) throws Exception {
