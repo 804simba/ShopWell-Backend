@@ -1,26 +1,19 @@
 package com.shopwell.api.utils;
 
 import java.sql.Date;
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
 public class DateUtils {
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
     public static String saveDate(LocalDateTime date) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         return date.format(formatter);
     }
 
-    public static LocalDate getLocalDate(String date) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        return LocalDate.parse(date, formatter);
-    }
-
     public static Date getDate(String date) {
-        LocalDate localDate = LocalDate.parse(date);
+        LocalDate localDate = LocalDate.parse(date, formatter);
         return Date.valueOf(localDate);
     }
 }
