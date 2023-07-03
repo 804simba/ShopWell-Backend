@@ -1,12 +1,16 @@
 package com.shopwell.api.service.implementations;
 
-import com.shopwell.api.model.VOs.response.Response;
+import com.shopwell.api.event_driven.RegisterEvent;
+import com.shopwell.api.model.VOs.response.ResponseOTPVO;
 import com.shopwell.api.model.entity.Customer;
 import com.shopwell.api.model.entity.OTPConfirmation;
 import com.shopwell.api.repository.CustomerRepository;
 import com.shopwell.api.repository.OTPRepository;
+import com.shopwell.api.service.OtpService;
+import com.shopwell.api.utils.RandomValues;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -15,41 +19,55 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 
-public class OtpServiceImpl {
+public class OtpServiceImpl  implements OtpService {
     private final OTPRepository otpRepository;
     private final CustomerRepository customerRepository;
-    public OTPConfirmation findUser(Customer customer){
-        return otpRepository.findId(customer.getCustomerId());
-    }
+    private final ApplicationEventPublisher applicationEventPublisher;
 
-    public void delete(OTPConfirmation confirmation){
-        otpRepository.delete(confirmation);
-    }
-    public void saveOtp(OTPConfirmation confirmation){
-        otpRepository.save(confirmation);
-    }
-
-
-    public Object verifyUserOtp(String email, String otp) {
+    @Override
+    public ResponseOTPVO verifyUserOtp(String email, String otp) {
         Customer customer = customerRepository.findCustomerByCustomerEmail(email).orElse(null);
+        System.out.println(customer);
         OTPConfirmation otpConfirmation = otpRepository.findByCustomerAndOtp_generator(customer.getCustomerId(), otp);
+        System.out.println(otpConfirmation);
         if (otpConfirmation != null && !isOtpExpired(otpConfirmation)) {
             System.out.println(otpConfirmation.getCustomer());
             otpConfirmation.getCustomer().setCustomerStatus(true);
             customerRepository.save(otpConfirmation.getCustomer());
-            return Response.builder()
+            return ResponseOTPVO.builder()
                     .message(otpConfirmation.getCustomer().getCustomerEmail())
                     .localDateTime(LocalDateTime.now())
                     .build();
         } else {
 
-            return Response.builder()
+            return ResponseOTPVO.builder()
                     .message("Invalid or expired OTP")
                     .localDateTime(LocalDateTime.now())
                     .build();
         }
     }
 
+    @Override
+    public ResponseOTPVO resendOtp(String email) {
+        Customer customer = customerRepository.findCustomerByCustomerEmail(email).orElseThrow(()->new RuntimeException("USER NOT FOUND"));
+
+        String otp = RandomValues.generateRandom();
+        OTPConfirmation confirmationToken = new OTPConfirmation(otp, customer);
+        System.out.println("****");
+        OTPConfirmation otpConfirmation = otpRepository.findId(customer.getCustomerId());
+        System.out.println("-----");
+        if (otpConfirmation != null){
+            otpRepository.delete(otpConfirmation);
+        }
+        otpRepository.save(confirmationToken);
+        System.out.println(otp);
+        applicationEventPublisher.publishEvent(new RegisterEvent(customer,otp));
+        return ResponseOTPVO.builder()
+                .message(otp)
+                .localDateTime(LocalDateTime.now())
+                .build();
+
+    }
     private boolean isOtpExpired(OTPConfirmation otpConfirmation) {
         LocalDateTime otpCreationTime = otpConfirmation.getExpiresAt();
         LocalDateTime currentDateTime = LocalDateTime.now();

@@ -26,8 +26,6 @@ public class CustomerServiceImpl implements CustomerService {
     private final CustomerRepository customerRepository;
     private final PasswordEncoder passwordEncoder;
     private final ApplicationEventPublisher publisher;
-    private final OtpServiceImpl otpService;
-
     private final OTPRepository otpRepository;
 
 

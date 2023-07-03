@@ -6,7 +6,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 @Builder
 @Data
-public class Response {
+public class ResponseVO {
     private String message;
     private LocalDateTime localDateTime;
 }

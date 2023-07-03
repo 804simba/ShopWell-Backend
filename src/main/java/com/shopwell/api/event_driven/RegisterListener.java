@@ -28,7 +28,7 @@ public class RegisterListener implements ApplicationListener<RegisterEvent> {
         MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
 
         messageHelper.setFrom("temple.chiorlu@decagon.dev");
-        messageHelper.setSubject("Pending Deposit");
+        messageHelper.setSubject("OTP Verification");
         messageHelper.setTo(customer);
         String mailContent = "<div style='width:100%; background:#f8f8f8;' >"
                 + "<p style='font-size: 18px;'>Hello, " + customer + "</p>"
