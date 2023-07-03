@@ -35,9 +35,9 @@ import java.util.List;
                 @UniqueConstraint(name = "guardianMobile_unique", columnNames = "customer_phone_number")
         }
 )
-public class Customer implements UserDetails {
+
 @EntityListeners(AuditingEntityListener.class)
-public class Customer extends BaseEntity implements Serializable {
+public class Customer extends BaseEntity implements UserDetails,Serializable {
     @Id
     @GeneratedValue(
             strategy = GenerationType.IDENTITY
