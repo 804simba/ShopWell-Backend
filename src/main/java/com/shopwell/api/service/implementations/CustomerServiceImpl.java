@@ -10,15 +10,14 @@ import com.shopwell.api.model.entity.OTPConfirmation;
 import com.shopwell.api.repository.CustomerRepository;
 import com.shopwell.api.repository.OTPRepository;
 import com.shopwell.api.service.CustomerService;
+import com.shopwell.api.utils.DateUtils;
 import com.shopwell.api.utils.RandomValues;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.sql.Date;
-import java.time.LocalDate;
-import java.util.Optional;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -65,6 +64,11 @@ public class CustomerServiceImpl implements CustomerService {
         return customerEntityToVO(foundCustomer);
     }
 
+    @Override
+    public List<Customer> findCustomersByBirthDate(int monthValue, int dayOfMonth) {
+        return null;
+    }
+
     private CustomerResponseVO customerEntityToVO(Customer customer) {
         return CustomerResponseVO.builder()
                 .firstName(customer.getCustomerFirstName())
@@ -83,7 +87,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .customerStatus(false)
                 .customerPassword(passwordEncoder.encode(customerRegistrationVO.getCustomerPassword()))
                 .customerCity(customerRegistrationVO.getCustomerCity())
-                .customerDateOfBirth(Date.valueOf(LocalDate.now()))
+                .customerDateOfBirth(DateUtils.getDate(customerRegistrationVO.getCustomerDateOfBirth()))
                 .customerStreetAddress(customerRegistrationVO.getCustomerStreetAddress())
                 .build();
     }

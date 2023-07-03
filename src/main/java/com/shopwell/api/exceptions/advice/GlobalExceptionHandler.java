@@ -4,6 +4,7 @@ import com.shopwell.api.exceptions.ImageDeleteException;
 import com.shopwell.api.exceptions.ImageUploadException;
 import com.shopwell.api.exceptions.ProductNotFoundException;
 import com.shopwell.api.model.VOs.response.ErrorMessageVO;
+import org.quartz.SchedulerException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -36,5 +37,14 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .build();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessageVO);
+    }
+
+    @ExceptionHandler(SchedulerException.class)
+    public ResponseEntity<?> schedulerException(SchedulerException exception) {
+        var errorMessageVO = ErrorMessageVO.builder()
+                .message(exception.getMessage())
+                .status(HttpStatus.BAD_REQUEST)
+                .build();
+        return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(errorMessageVO);
     }
 }
