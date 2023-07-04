@@ -2,7 +2,7 @@ package com.shopwell.api.service.implementations;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.shopwell.api.event_driven.PaymentEvent;
+import com.shopwell.api.events.PaymentEvent;
 import com.shopwell.api.exceptions.CustomerNotFoundException;
 import com.shopwell.api.model.VOs.request.paymentDTOs.*;
 import com.shopwell.api.model.entity.Customer;
