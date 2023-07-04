@@ -8,6 +8,4 @@ import lombok.Data;
 public class RemoveFromCartRequest {
 
     private Long productId;
-
-    private Long customerId;
 }

@@ -1,11 +1,16 @@
 package com.shopwell.api.service.implementations;
 
+import com.shopwell.api.exceptions.CustomerNotFoundException;
+import com.shopwell.api.model.VOs.request.AddToCartRequestVO;
 import com.shopwell.api.model.VOs.response.CartItemResponseVO;
 import com.shopwell.api.model.entity.*;
 import com.shopwell.api.repository.CartItemRepository;
 import com.shopwell.api.repository.CartRepository;
 import com.shopwell.api.repository.CustomerRepository;
+import com.shopwell.api.repository.ProductRepository;
 import com.shopwell.api.service.CartService;
+import com.shopwell.api.utils.MapperUtils;
+import com.shopwell.api.utils.UserUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,9 +28,23 @@ public class CartServiceImpl implements CartService {
 
     private final CustomerRepository customerRepository;
 
+    private final ProductRepository productRepository;
+
+    private final MapperUtils mapperUtils;
+
     @Override
-    public String addProductToCart(Product product, Long customerId, int quantity) {
-        Cart cart = getOrCreateCart(customerId);
+    public String addProductToCart(AddToCartRequestVO addToCartRequestVO) throws CustomerNotFoundException {
+
+        Customer customer = UserUtils.getAuthenticatedCustomer(Customer.class);
+
+        if (customer == null) {
+            throw new CustomerNotFoundException("Customer not found");
+        }
+
+        Product product = productRepository.findById(addToCartRequestVO.getProductId())
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        Cart cart = getOrCreateCart(customer.getCustomerEmail());
         CartItem cartItem = getCartItemByProductAndCart(product, cart);
 
         if (cartItem == null) {
@@ -33,9 +52,9 @@ public class CartServiceImpl implements CartService {
             cartItem.setProduct(product);
             cartItem.setCart(cart);
             cartItem.setQuotedPrice(BigDecimal.valueOf(product.getProductPrice()));
-            cartItem.setQuantityOrdered(quantity);
+            cartItem.setQuantityOrdered(addToCartRequestVO.getQuantity());
         } else {
-            cartItem.setQuantityOrdered(cartItem.getQuantityOrdered() + quantity);
+            cartItem.setQuantityOrdered(cartItem.getQuantityOrdered() + addToCartRequestVO.getQuantity());
         }
 
         cartItemRepository.save(cartItem);
@@ -43,29 +62,44 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public String removeProductFromCart(Product product, Long customerId) {
-        Cart cart = getOrCreateCart(customerId);
-        CartItem cartItem = getCartItemByProductAndCart(product, cart);
+    public void removeProductFromCart(Long productId) throws CustomerNotFoundException {
+        Customer customer = UserUtils.getAuthenticatedCustomer(Customer.class);
+
+        if (customer == null) {
+            throw new CustomerNotFoundException("Customer not found");
+        }
+
+        Cart cart = getOrCreateCart(customer.getCustomerEmail());
+
+        Product foundProduct = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        CartItem cartItem = getCartItemByProductAndCart(foundProduct, cart);
 
         if (cartItem != null) {
             cartItemRepository.delete(cartItem);
         }
-        return "Product removed from cart successfully";
     }
 
     @Override
-    public List<CartItemResponseVO> getCartItems(Long customerId) {
-        Cart cart = getOrCreateCart(customerId);
+    public List<CartItemResponseVO> getCartItems() throws CustomerNotFoundException {
+        Customer customer = UserUtils.getAuthenticatedCustomer(Customer.class);
+
+        if (customer == null) {
+            throw new CustomerNotFoundException("Customer not found");
+        }
+
+        Cart cart = getOrCreateCart(customer.getCustomerEmail());
         List<CartItem> cartItems = cart.getCartItems();
 
         return cartItems.stream()
-                .map(this::mapToCartItemResponse)
+                .map(mapperUtils::cartItemToCartItemResponseVO)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Double calculateTotalPrice(Long customerId) {
-        Cart cart = getOrCreateCart(customerId);
+    public Double calculateTotalPrice(String email) {
+        Cart cart = getOrCreateCart(email);
         List<CartItem> cartItems = cart.getCartItems();
 
         double totalPrice = 0.0;
@@ -84,32 +118,15 @@ public class CartServiceImpl implements CartService {
         return cartItemRepository.findByProductAndCart(product, cart);
     }
 
-    private Cart getOrCreateCart(Long customerId) {
-        Customer foundCustomer = customerRepository.findById(customerId)
+    private Cart getOrCreateCart(String email) {
+        Customer foundCustomer = customerRepository.findCustomerByCustomerEmail(email)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
-        return cartRepository.findByCustomer_CustomerId(customerId)
+        return cartRepository.findByCustomer_CustomerId(foundCustomer.getCustomerId())
                 .orElseGet(() -> {
                     Cart cart = new Cart();
                     cart.setCustomer(foundCustomer);
                     return cartRepository.save(cart);
                 });
-    }
-
-    private CartItemResponseVO mapToCartItemResponse(CartItem cartItem) {
-        List<ProductImage> productImages = cartItem.getProduct().getProductImageURLs();
-        String productImageURL = "";
-
-        if (!productImages.isEmpty()) {
-            productImageURL = productImages.get(0).getImageUrl();
-        }
-
-        return CartItemResponseVO.builder()
-                .productId(cartItem.getProduct().getProductNumber())
-                .productName(cartItem.getProduct().getProductName())
-                .quantity(cartItem.getQuantityOrdered())
-                .productPrice(String.valueOf(cartItem.getProduct().getProductPrice()))
-                .productImage(productImageURL)
-                .build();
     }
 }

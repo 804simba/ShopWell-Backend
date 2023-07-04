@@ -8,9 +8,9 @@ import com.shopwell.api.model.VOs.response.CustomerResponseVO;
 import com.shopwell.api.model.entity.Customer;
 import com.shopwell.api.model.entity.OTPConfirmation;
 import com.shopwell.api.repository.CustomerRepository;
-import com.shopwell.api.repository.OTPRepository;
 import com.shopwell.api.service.CustomerService;
-import com.shopwell.api.utils.DateUtils;
+import com.shopwell.api.service.image.CustomerImageService;
+import com.shopwell.api.utils.MapperUtils;
 import com.shopwell.api.utils.RandomValues;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -18,25 +18,40 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Random;
 
 @RequiredArgsConstructor
 @Service
 public class CustomerServiceImpl implements CustomerService {
     private final CustomerRepository customerRepository;
+
     private final PasswordEncoder passwordEncoder;
+
     private final ApplicationEventPublisher publisher;
+
     private final OtpServiceImpl otpService;
+
+    private final MapperUtils mapperUtils;
+
+    private final CustomerImageService customerImageService;
 
 
     @Override
     public ApiResponseVO<?> registerCustomer(CustomerRegistrationVO registrationVO) {
-        Customer customer = customerVOToEntity(registrationVO);
+        Customer customer = mapperUtils.customerVOToCustomerEntity(registrationVO);
+        Random random = new Random();
+        Long imageId = random.nextLong(9000) + 1000;
+
+        String imageURL = customerImageService.uploadImage(imageId, registrationVO.getCustomerImage());
+        customer.setCustomerImageURL(imageURL);
+
+        customer.setCustomerPassword(passwordEncoder.encode(registrationVO.getCustomerPassword()));
         Customer saveUser = customerRepository.save(customer);
         publisher.publishEvent(new RegisterEvent(customer,generatingOtp(customer)));
 
         return ApiResponseVO.builder()
                 .message("Account created successfully")
-                .payload(customerEntityToVO(saveUser)).build();
+                .payload(mapperUtils.customerEntityToCustomerResponseVO(saveUser)).build();
     }
     private String generatingOtp(Customer customer)  {
         String otp = RandomValues.generateRandom();
@@ -50,34 +65,11 @@ public class CustomerServiceImpl implements CustomerService {
     public CustomerResponseVO findCustomerByEmail(String email) throws CustomerNotFoundException {
         Customer foundCustomer = customerRepository
                 .findCustomerByCustomerEmail(email).orElseThrow(() -> new CustomerNotFoundException(String.format("Custome with email %s not found", email)));
-        return customerEntityToVO(foundCustomer);
+        return mapperUtils.customerEntityToCustomerResponseVO(foundCustomer);
     }
 
     @Override
     public List<Customer> findCustomersByBirthDate(int monthValue, int dayOfMonth) {
-        return null;
-    }
-
-    private CustomerResponseVO customerEntityToVO(Customer customer) {
-        return CustomerResponseVO.builder()
-                .firstName(customer.getCustomerFirstName())
-
-                .lastName(customer.getCustomerLastName())
-                .emailAddress(customer.getCustomerEmail())
-                .build();
-    }
-
-    private Customer customerVOToEntity(CustomerRegistrationVO customerRegistrationVO) {
-        return Customer.builder()
-                .customerFirstName(customerRegistrationVO.getCustomerFirstName())
-                .customerLastName(customerRegistrationVO.getCustomerLastName())
-                .customerEmail(customerRegistrationVO.getCustomerEmail())
-                .customerPhoneNumber(customerRegistrationVO.getCustomerPhoneNumber())
-                .customerStatus(false)
-                .customerPassword(passwordEncoder.encode(customerRegistrationVO.getCustomerPassword()))
-                .customerCity(customerRegistrationVO.getCustomerCity())
-                .customerDateOfBirth(DateUtils.getDate(customerRegistrationVO.getCustomerDateOfBirth()))
-                .customerStreetAddress(customerRegistrationVO.getCustomerStreetAddress())
-                .build();
+        return customerRepository.findByCustomersDateOfBirth(monthValue, dayOfMonth);
     }
 }

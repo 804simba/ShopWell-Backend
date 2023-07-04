@@ -9,8 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AddToCartRequestVO {
 
-    private Long customerId;
-
     private Long productId;
 
     private int quantity;

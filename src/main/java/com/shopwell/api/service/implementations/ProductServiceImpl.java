@@ -2,9 +2,11 @@ package com.shopwell.api.service.implementations;
 
 import com.shopwell.api.exceptions.ImageUploadException;
 import com.shopwell.api.exceptions.ProductNotFoundException;
-import com.shopwell.api.model.VOs.request.*;
+import com.shopwell.api.model.VOs.request.BrandRegistrationVO;
+import com.shopwell.api.model.VOs.request.CategoryRegistrationVO;
+import com.shopwell.api.model.VOs.request.ProductRegistrationVO;
+import com.shopwell.api.model.VOs.request.ProductSearchRequestVO;
 import com.shopwell.api.model.VOs.response.ApiResponseVO;
-import com.shopwell.api.model.VOs.response.CartItemResponseVO;
 import com.shopwell.api.model.VOs.response.ProductResponseVO;
 import com.shopwell.api.model.VOs.response.ProductSearchResponseVO;
 import com.shopwell.api.model.entity.Brand;
@@ -13,11 +15,10 @@ import com.shopwell.api.model.entity.Product;
 import com.shopwell.api.model.entity.ProductImage;
 import com.shopwell.api.repository.ProductRepository;
 import com.shopwell.api.service.BrandService;
-import com.shopwell.api.service.CartService;
 import com.shopwell.api.service.CategoryService;
 import com.shopwell.api.service.ProductService;
 import com.shopwell.api.service.image.ProductImageService;
-import com.shopwell.api.utils.PageUtils;
+import com.shopwell.api.utils.MapperUtils;
 import com.shopwell.api.utils.search.ProductSpecificationBuilder;
 import com.shopwell.api.utils.search.SearchCriteria;
 import jakarta.transaction.Transactional;
@@ -39,21 +40,21 @@ public class ProductServiceImpl implements ProductService {
 
     private final CategoryService categoryService;
 
-    private final CartService cartService;
-
     private final ProductImageService productImageService;
+
+    private final MapperUtils mapperUtils;
 
     @Override
     @Transactional
     public ApiResponseVO<?> saveProduct(ProductRegistrationVO productRegistrationVO) {
         try {
-            Product product = mapProductRegistrationVOToProduct(productRegistrationVO);
+            Product product = mapperUtils.mapProductRegistrationVOToProduct(productRegistrationVO);
 
             List<MultipartFile> imageFiles = productRegistrationVO.getImageFiles();
             var savedProduct = productRepository.save(product);
 
             List<String> imageURLs = saveProductImages(savedProduct, imageFiles);
-            savedProduct.setProductImageURLs(mapToProductImages(imageURLs));
+            savedProduct.setProductImageURLs(mapperUtils.imageUrlsToProductImageEntity(imageURLs));
             productRepository.save(savedProduct);
 
             return ApiResponseVO.builder()
@@ -69,12 +70,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ApiResponseVO<?> getProducts() {
-        Pageable pageable = PageRequest.of(PageUtils.DEFAULT_PAGE_NUMBER, PageUtils.DEFAULT_PAGE_SIZE);
+    public ApiResponseVO<?> getProducts(int pageNumber, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<Product> productPage = productRepository.findAll(pageable);
 
         List<ProductResponseVO> products = productPage.getContent().stream()
-                .map(this::mapProductToVO).collect(Collectors.toList());
+                .map(mapperUtils::productEntityToProductVO).collect(Collectors.toList());
 
         return ApiResponseVO.builder()
                 .payload(new PageImpl<>(products, pageable, productPage.getTotalElements()))
@@ -119,7 +120,7 @@ public class ProductServiceImpl implements ProductService {
 
             return ApiResponseVO.builder()
                     .message("Product saved successfully")
-                    .payload(mapProductToVO(savedProduct))
+                    .payload(mapperUtils.productEntityToProductVO(savedProduct))
                     .build();
         } catch (ProductNotFoundException e) {
             return ApiResponseVO.builder()
@@ -139,7 +140,7 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new ProductNotFoundException("Product not found"));
         return ApiResponseVO.builder()
                 .message("Product saved successfully")
-                .payload(mapProductToVO(foundProduct))
+                .payload(mapperUtils.productEntityToProductVO(foundProduct))
                 .build();
     }
 
@@ -181,7 +182,7 @@ public class ProductServiceImpl implements ProductService {
         Page<Product> productPage = productRepository.findAll(builder.build(), pageable);
 
         List<ProductResponseVO> products = productPage.getContent().stream()
-                .map(this::mapProductToVO)
+                .map(mapperUtils::productEntityToProductVO)
                 .collect(Collectors.toList());
 
         ProductSearchResponseVO searchResponseVO = new ProductSearchResponseVO();
@@ -192,66 +193,6 @@ public class ProductServiceImpl implements ProductService {
         searchResponseVO.setTotalElements(productPage.getTotalElements());
 
         return new ApiResponseVO<>("Search results", searchResponseVO);
-    }
-
-    @Override
-    public String addProductToCart(AddToCartRequestVO addToCartRequestVO) {
-        Product foundProduct = productRepository.findById(addToCartRequestVO.getProductId())
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-
-        return cartService.addProductToCart(foundProduct, addToCartRequestVO.getCustomerId(), addToCartRequestVO.getQuantity());
-    }
-
-    @Override
-    public String removeProductFromCart(Long productId, Long customerId) {
-        Product foundProduct = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-
-        return cartService.removeProductFromCart(foundProduct, customerId);
-    }
-
-    @Override
-    public List<CartItemResponseVO> getCartItems(Long customerId) {
-        return cartService.getCartItems(customerId);
-    }
-
-    @Override
-    public Double calculateTotalPrice(Long customerId) {
-        return cartService.calculateTotalPrice(customerId);
-    }
-
-    private Product mapProductRegistrationVOToProduct(ProductRegistrationVO productRegistrationVO) {
-
-        Brand brand = brandService.registerBrand(new BrandRegistrationVO(productRegistrationVO.getBrandName()));
-
-        Category category = categoryService.registerCategory(new CategoryRegistrationVO(productRegistrationVO.getCategoryName()));
-
-        return Product.builder()
-                .productName(productRegistrationVO.getProductName())
-                .productDescription(productRegistrationVO.getProductDescription())
-                .productPrice(Double.parseDouble(productRegistrationVO.getProductPrice()))
-                .brand(brand)
-                .category(category)
-                .quantityAvailable(Integer.parseInt(productRegistrationVO.getQuantityAvailable()))
-                .build();
-    }
-
-    private ProductResponseVO mapProductToVO(Product product) {
-        return ProductResponseVO.builder()
-                .productId(product.getProductNumber())
-                .productName(product.getProductName())
-                .brandName(product.getBrand().getBrandName())
-                .categoryName(product.getCategory().getCategoryName())
-                .productDescription(product.getProductDescription())
-                .productPrice(String.valueOf(product.getProductPrice()))
-                .quantityAvailable(product.getQuantityAvailable())
-                .build();
-    }
-
-    private List<ProductImage> mapToProductImages(List<String> imageURLs) {
-        return imageURLs.stream().map(url -> ProductImage.builder()
-                .imageUrl(url)
-                .build()).collect(Collectors.toList());
     }
 
     private List<String> saveProductImages(Product product, List<MultipartFile> imageFiles) {

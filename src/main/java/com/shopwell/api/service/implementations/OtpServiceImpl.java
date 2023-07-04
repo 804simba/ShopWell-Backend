@@ -1,6 +1,7 @@
 package com.shopwell.api.service.implementations;
 
 import com.shopwell.api.event_driven.RegisterEvent;
+import com.shopwell.api.exceptions.CustomerNotFoundException;
 import com.shopwell.api.model.VOs.response.ResponseOTPVO;
 import com.shopwell.api.model.entity.Customer;
 import com.shopwell.api.model.entity.OTPConfirmation;
@@ -10,6 +11,8 @@ import com.shopwell.api.service.OtpService;
 import com.shopwell.api.utils.RandomValues;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
@@ -18,16 +21,19 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
-
+@Slf4j
 public class OtpServiceImpl  implements OtpService {
     private final OTPRepository otpRepository;
     private final CustomerRepository customerRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
+    @SneakyThrows
     public ResponseOTPVO verifyUserOtp(String email, String otp) {
-        Customer customer = customerRepository.findCustomerByCustomerEmail(email).orElse(null);
-        System.out.println(customer);
+        Customer customer = customerRepository.findCustomerByCustomerEmail(email)
+                .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
+
+        log.info("Verifying OTP:: " + customer);
         OTPConfirmation otpConfirmation = otpRepository.findByCustomerAndOtp_generator(customer.getCustomerId(), otp);
         System.out.println(otpConfirmation);
         if (otpConfirmation != null && !isOtpExpired(otpConfirmation)) {
@@ -39,7 +45,6 @@ public class OtpServiceImpl  implements OtpService {
                     .localDateTime(LocalDateTime.now())
                     .build();
         } else {
-
             return ResponseOTPVO.builder()
                     .message("Invalid or expired OTP")
                     .localDateTime(LocalDateTime.now())

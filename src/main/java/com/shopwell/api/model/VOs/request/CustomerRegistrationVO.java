@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @AllArgsConstructor
@@ -48,4 +49,6 @@ public class CustomerRegistrationVO {
     @NotNull
     @NotEmpty(message = "Enter your password")
     private String customerPassword;
+
+    private MultipartFile customerImage;
 }

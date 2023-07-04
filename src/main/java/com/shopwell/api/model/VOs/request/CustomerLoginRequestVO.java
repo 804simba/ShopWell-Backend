@@ -11,5 +11,5 @@ public class CustomerLoginRequestVO {
     private String email;
     @NotNull
     @NotEmpty(message = "Enter your password")
-    private String customerPassword;
+    private String password;
 }

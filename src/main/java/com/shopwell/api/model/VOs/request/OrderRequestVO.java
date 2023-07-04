@@ -9,8 +9,6 @@ import lombok.Data;
 @Builder
 public class OrderRequestVO {
 
-    private Long customerId;
-
     private String shippingAddress;
 
     private String paymentMethod;

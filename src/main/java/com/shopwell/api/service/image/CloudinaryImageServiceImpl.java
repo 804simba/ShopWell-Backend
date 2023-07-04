@@ -22,7 +22,7 @@ public class CloudinaryImageServiceImpl<T> implements ImageService<T> {
     private final CloudinaryConfig config;
 
     @Override
-    public String uploadImage(Long productId, MultipartFile imageFile) {
+    public String uploadImage(Long imageID, MultipartFile imageFile) {
         try {
             if (imageFile.isEmpty()) {
                 throw new ImageUploadException("No image file");
@@ -35,7 +35,7 @@ public class CloudinaryImageServiceImpl<T> implements ImageService<T> {
                     .quality(80);
 
             Map<?, ?> uploadResult = config.cloudinary().uploader().upload(imageFile.getBytes(), ObjectUtils.asMap(
-                    "public_id", getPublicIdPrefix() + productId,
+                    "public_id", getPublicIdPrefix() + imageID,
                     "transformation", transformation,
                     "timestamp", String.valueOf(System.currentTimeMillis()),
                     "use_filename", true,

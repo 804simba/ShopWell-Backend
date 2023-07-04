@@ -1,19 +1,18 @@
 package com.shopwell.api.service;
 
-import com.shopwell.api.model.VOs.request.CartItemVO;
+import com.shopwell.api.exceptions.CustomerNotFoundException;
+import com.shopwell.api.model.VOs.request.AddToCartRequestVO;
 import com.shopwell.api.model.VOs.response.CartItemResponseVO;
-import com.shopwell.api.model.entity.Product;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 public interface CartService {
 
-    String addProductToCart(Product product, Long customerId, int quantity);
+    String addProductToCart(AddToCartRequestVO addToCartRequestVO) throws CustomerNotFoundException;
 
-    String removeProductFromCart(Product product, Long customerId);
+    void removeProductFromCart(Long productId) throws CustomerNotFoundException;
 
-    List<CartItemResponseVO> getCartItems(Long customerId);
+    List<CartItemResponseVO> getCartItems() throws CustomerNotFoundException;
 
-    Double calculateTotalPrice(Long customerId);
+    Double calculateTotalPrice(String email);
 }

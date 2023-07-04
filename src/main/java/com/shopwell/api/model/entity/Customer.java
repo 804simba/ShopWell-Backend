@@ -1,11 +1,9 @@
 package com.shopwell.api.model.entity;
 
-import com.shopwell.api.model.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
@@ -46,6 +44,7 @@ public class Customer extends BaseEntity implements UserDetails,Serializable {
 
     @Column(name = "customer_email")
     private String customerEmail;
+
     @Column(name = "customer_password")
     private String customerPassword;
 
@@ -58,13 +57,19 @@ public class Customer extends BaseEntity implements UserDetails,Serializable {
 
     @Column(name = "customer_street_address")
     private String customerStreetAddress;
+
     @Column(name = "customer_status")
     private Boolean customerStatus;
 
     @Column(name = "customer_city")
     private String customerCity;
-    @Enumerated(EnumType.STRING)
-    private Role role;
+
+    @Column(name = "customer_image")
+    private String customerImageURL;
+
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id")
+    private RoleEntity role;
 
     @OneToMany(mappedBy = "customer")
     private final List<Order> orders = new ArrayList<>();
@@ -77,7 +82,7 @@ public class Customer extends BaseEntity implements UserDetails,Serializable {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
+        return role.getAuthorities();
     }
 
     @Override

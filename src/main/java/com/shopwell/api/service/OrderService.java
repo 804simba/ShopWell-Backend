@@ -9,13 +9,13 @@ import java.util.List;
 
 public interface OrderService {
 
-    OrderResponseVO placeOrder(Long customerId, OrderRequestVO orderRequestVO) throws CustomerNotFoundException;
+    OrderResponseVO placeOrder(OrderRequestVO orderRequestVO) throws CustomerNotFoundException;
 
     List<OrderResponseVO> getOrderDetails(Long orderId);
 
     String cancelOrder(Long orderId);
 
-    List<OrderResponseVO> getCustomerOrders(Long customerId) throws CustomerNotFoundException;
+    List<OrderResponseVO> getCustomerOrders(int pageNumber, int pageSize) throws CustomerNotFoundException;
 
     String updateOrderStatus(Long orderId, OrderStatus status);
 }
