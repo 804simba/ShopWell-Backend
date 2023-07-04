@@ -1,6 +1,6 @@
 package com.shopwell.api.service.implementations;
 
-import com.shopwell.api.event_driven.RegisterEvent;
+import com.shopwell.api.events.RegisterEvent;
 import com.shopwell.api.exceptions.CustomerNotFoundException;
 import com.shopwell.api.model.VOs.request.CustomerRegistrationVO;
 import com.shopwell.api.model.VOs.response.ApiResponseVO;

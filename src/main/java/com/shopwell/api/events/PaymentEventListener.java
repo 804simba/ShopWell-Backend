@@ -1,4 +1,4 @@
-package com.shopwell.api.event_driven;
+package com.shopwell.api.events;
 
 import com.shopwell.api.model.entity.Customer;
 import com.shopwell.api.service.EmailService;

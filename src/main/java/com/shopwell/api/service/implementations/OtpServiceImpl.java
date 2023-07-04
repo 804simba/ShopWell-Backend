@@ -1,6 +1,6 @@
 package com.shopwell.api.service.implementations;
 
-import com.shopwell.api.event_driven.RegisterEvent;
+import com.shopwell.api.events.RegisterEvent;
 import com.shopwell.api.exceptions.CustomerNotFoundException;
 import com.shopwell.api.model.VOs.response.ResponseOTPVO;
 import com.shopwell.api.model.entity.Customer;
@@ -9,7 +9,6 @@ import com.shopwell.api.repository.CustomerRepository;
 import com.shopwell.api.repository.OTPRepository;
 import com.shopwell.api.service.OtpService;
 import com.shopwell.api.utils.RandomValues;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
