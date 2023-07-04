@@ -2,7 +2,7 @@ package com.shopwell.api.controller;
 
 import com.shopwell.api.model.VOs.request.BrandRegistrationVO;
 import com.shopwell.api.model.VOs.response.ApiResponseVO;
-import com.shopwell.api.service.BrandService;
+import com.shopwell.api.services.BrandService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @Tag(name = "Brand")
 @SecurityRequirement(name = "Bearer Authentication")
+@PreAuthorize("hasRole('ROLE_ADMIN')")
 public class BrandController {
 
     private final BrandService brandService;

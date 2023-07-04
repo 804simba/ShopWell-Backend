@@ -4,10 +4,8 @@ import com.shopwell.api.exceptions.ProductNotFoundException;
 import com.shopwell.api.model.VOs.request.ProductRegistrationVO;
 import com.shopwell.api.model.VOs.request.ProductSearchRequestVO;
 import com.shopwell.api.model.VOs.response.ApiResponseVO;
-import com.shopwell.api.model.VOs.response.CustomerResponseVO;
 import com.shopwell.api.model.VOs.response.ProductSearchResponseVO;
-import com.shopwell.api.service.ProductService;
-import com.shopwell.api.utils.PageUtils;
+import com.shopwell.api.services.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -22,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -46,6 +45,7 @@ public final class ProductController {
 
     })
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public ResponseEntity<ApiResponseVO<?>> saveProduct(@Parameter(description = "Product to save") @Valid @ModelAttribute final ProductRegistrationVO registrationVO) {
         log.info("Saving product: " + registrationVO);
         ApiResponseVO<?> response = new ApiResponseVO<>(productService.saveProduct(registrationVO));
@@ -62,6 +62,7 @@ public final class ProductController {
             }
     )
     @PutMapping(value = "/{productId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public ResponseEntity<ApiResponseVO<?>> editProduct(@Parameter(description = "Product to edit") @PathVariable("productId") final Long productId, @ModelAttribute final ProductRegistrationVO registrationVO) throws ProductNotFoundException {
         log.info("Editing product: " + registrationVO);
         ApiResponseVO<?> response = new ApiResponseVO<>(productService.editProduct(productId, registrationVO));
@@ -77,6 +78,7 @@ public final class ProductController {
             }
     )
     @DeleteMapping("/{productId}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public ResponseEntity<ApiResponseVO<?>> deleteProduct(@Parameter(description = "Product to delete") @PathVariable("productId") final Long productId) throws ProductNotFoundException {
         log.info("Deleting product with id: " + productId);
         ApiResponseVO<?> response = new ApiResponseVO<>(productService.deleteProduct(productId));
@@ -92,6 +94,7 @@ public final class ProductController {
             }
     )
     @GetMapping("/{productId}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
     public ResponseEntity<ApiResponseVO<?>> getProductById(@Parameter(description = "Product to get by ID") @PathVariable("productId") final Long productId) throws ProductNotFoundException {
         log.info("Getting product with id: " + productId);
         ApiResponseVO<?> response = new ApiResponseVO<>(productService.getProduct(productId));
@@ -107,6 +110,7 @@ public final class ProductController {
             }
     )
     @GetMapping
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
     public ResponseEntity<ApiResponseVO<?>> getProducts(@RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
                                                         @RequestParam(name = "pageSize", defaultValue = "20") int pageSize) {
         log.info("Getting products");
@@ -127,6 +131,7 @@ public final class ProductController {
 
     })
     @GetMapping("/search")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
     public ResponseEntity<ApiResponseVO<?>> searchProducts(@RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
                                                            @RequestParam(name = "pageSize", defaultValue = "20") int pageSize,
                                                            @RequestBody ProductSearchRequestVO productSearchRequestVO) {

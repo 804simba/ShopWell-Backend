@@ -4,8 +4,8 @@ import com.shopwell.api.model.VOs.request.CustomerLoginRequestVO;
 import com.shopwell.api.model.VOs.response.ApiResponseVO;
 import com.shopwell.api.model.VOs.response.CustomerResponseVO;
 import com.shopwell.api.model.VOs.response.ResponseOTPVO;
-import com.shopwell.api.service.AuthService;
-import com.shopwell.api.service.OtpService;
+import com.shopwell.api.services.AuthService;
+import com.shopwell.api.services.OtpService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -15,6 +15,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/auth")
 @Tag(name = "Authentication")
 @SecurityRequirement(name = "Bearer Authentication")
+@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
 public class AuthenticationController {
     private final OtpService otpService;
     private final AuthService authService;

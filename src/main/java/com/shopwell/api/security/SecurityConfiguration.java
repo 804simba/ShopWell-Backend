@@ -16,7 +16,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfiguration {
         private final JWTAuthenticationFilter jwtAuthFilter;
+
         private final AuthEntryPoint authEntryPoint;
+
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
             http
@@ -32,7 +34,7 @@ public class SecurityConfiguration {
                     .and()
                     .authorizeHttpRequests()
                     .requestMatchers(
-                            "/api/v1/customers/**","/api/v1/auth/**",
+                            "/api/v1/customers/**","/api/v1/auth/**", "/api/v1/admin/register",
                             "/v2/api-docs",
                             "/v3/api-docs",
                             "/v3/api-docs/**",
@@ -48,10 +50,7 @@ public class SecurityConfiguration {
                     .anyRequest()
                     .authenticated()
                     .and()
-                    .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-
-
-            ;
+                    .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
             return http.build();
         }
