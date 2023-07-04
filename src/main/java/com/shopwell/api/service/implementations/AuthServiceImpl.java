@@ -5,7 +5,6 @@ import com.shopwell.api.model.VOs.request.CustomerLoginRequestVO;
 import com.shopwell.api.model.VOs.response.CustomerResponseVO;
 import com.shopwell.api.model.entity.Customer;
 import com.shopwell.api.repository.CustomerRepository;
-import com.shopwell.api.repository.OTPRepository;
 import com.shopwell.api.security.JwtService;
 import com.shopwell.api.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -16,22 +15,20 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final CustomerRepository customerRepository;
     private final JwtService jwtService;
-    @SneakyThrows
 
+    @SneakyThrows
     @Override
     public CustomerResponseVO authenticate(CustomerLoginRequestVO customerLoginRequestVO) {
 
         Customer user =findEmail(customerLoginRequestVO.getEmail());
         if(user.getCustomerStatus()) {
-            if (!passwordEncoder.matches(customerLoginRequestVO.getCustomerPassword(), user.getPassword())) {
+            if (!passwordEncoder.matches(customerLoginRequestVO.getPassword(), user.getPassword())) {
                 throw new InvalidCredentialsException("Invalid Password");
             }
             String jwt = jwtService.generateToken(user);
@@ -50,8 +47,6 @@ public class AuthServiceImpl implements AuthService {
             return CustomerResponseVO.builder()
                     .emailAddress(user.getCustomerEmail())
                     .object("ERROR")
-                    .firstName(null)
-                    .lastName(null)
                     .build();
         }
     }

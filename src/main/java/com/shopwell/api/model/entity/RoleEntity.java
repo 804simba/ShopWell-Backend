@@ -1,11 +1,14 @@
 package com.shopwell.api.model.entity;
 
-import com.shopwell.api.model.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "roles")
@@ -18,7 +21,19 @@ public class RoleEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "role_name")
-    private Role roleName;
+    private String roleName;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "role_permissions",
+    joinColumns = @JoinColumn(name = "role_id"))
+    @Column(name = "permission")
+    private List<String> permissions;
+
+    public List<SimpleGrantedAuthority> getAuthorities() {
+        List<SimpleGrantedAuthority> authorities = getPermissions().stream()
+                .map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + this.roleName));
+        return authorities;
+    }
 }

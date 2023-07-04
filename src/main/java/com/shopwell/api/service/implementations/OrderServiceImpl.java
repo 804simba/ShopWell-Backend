@@ -3,16 +3,19 @@ package com.shopwell.api.service.implementations;
 import com.shopwell.api.exceptions.CartNotFoundException;
 import com.shopwell.api.exceptions.CustomerNotFoundException;
 import com.shopwell.api.model.VOs.request.OrderRequestVO;
-import com.shopwell.api.model.VOs.response.OrderItemVO;
 import com.shopwell.api.model.VOs.response.OrderResponseVO;
 import com.shopwell.api.model.entity.*;
 import com.shopwell.api.model.enums.OrderStatus;
 import com.shopwell.api.repository.CartRepository;
-import com.shopwell.api.repository.CustomerRepository;
 import com.shopwell.api.repository.OrderRepository;
 import com.shopwell.api.service.CartService;
 import com.shopwell.api.service.OrderService;
+import com.shopwell.api.utils.MapperUtils;
+import com.shopwell.api.utils.UserUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -27,16 +30,19 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
     private final CartRepository cartRepository;
-    private final CustomerRepository customerRepository;
     private final CartService cartService;
+    private final MapperUtils mapperUtils;
 
     @Override
-    public OrderResponseVO placeOrder(Long customerId, OrderRequestVO orderRequestVO) {
+    public OrderResponseVO placeOrder(OrderRequestVO orderRequestVO) {
         try {
-            Customer foundCustomer = customerRepository.findById(customerId)
-                    .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
+            Customer customer = UserUtils.getAuthenticatedCustomer(Customer.class);
 
-            Cart cart = cartRepository.findCartByCustomer(foundCustomer)
+            if (customer == null) {
+                throw new CustomerNotFoundException("Customer not found");
+            }
+
+            Cart cart = cartRepository.findCartByCustomer(customer)
                     .orElseThrow(() -> new CartNotFoundException("Cart not found"));
             List<CartItem> cartItems = cart.getCartItems();
 
@@ -45,16 +51,16 @@ public class OrderServiceImpl implements OrderService {
             order.setPaymentMethod(orderRequestVO.getPaymentMethod());
 
             List<OrderItem> orderItems = cartItems.stream()
-                    .map(this::mapCartItem).collect(Collectors.toList());
+                    .map(mapperUtils::cartItemToOrderItem).collect(Collectors.toList());
 
             orderItems.forEach(orderItem -> orderItem.setOrder(order));
 
             order.setOrderItems(orderItems);
             order.setOrderDate(Timestamp.from(Instant.now()));
             order.setOrderStatus(OrderStatus.PENDING);
-            order.setCustomer(foundCustomer);
+            order.setCustomer(customer);
 
-            Double totalCostOfGoods = cartService.calculateTotalPrice(customerId);
+            Double totalCostOfGoods = cartService.calculateTotalPrice(customer.getCustomerEmail());
 
             order.setOrderTotal(BigDecimal.valueOf(totalCostOfGoods));
 
@@ -79,7 +85,7 @@ public class OrderServiceImpl implements OrderService {
                         .orderId(orderItem.getId())
                         .orderDate(order.getOrderDate().toString())
                         .orderStatus(order.getOrderStatus().name())
-                        .orderItems(List.of(mapOrderItem(orderItem)))
+                        .orderItems(List.of(mapperUtils.orderItemToOrderItemVO(orderItem)))
                         .build()).collect(Collectors.toList());
     }
 
@@ -94,17 +100,24 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderResponseVO> getCustomerOrders(Long customerId) throws CustomerNotFoundException {
-        Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
+    public List<OrderResponseVO> getCustomerOrders(int pageNumber, int pageSize) throws CustomerNotFoundException {
+        Customer customer = UserUtils.getAuthenticatedCustomer(Customer.class);
 
-        return customer.getOrders().stream()
+        if (customer == null) {
+            throw new CustomerNotFoundException("Customer not found");
+        }
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+        Page<Order> ordersPage = orderRepository.findByCustomer(customer, pageable);
+
+        return ordersPage.stream()
                 .map(order -> OrderResponseVO.builder()
                         .orderId(order.getOrderId())
                         .orderDate(order.getOrderDate().toString())
                         .orderStatus(order.getOrderStatus().name())
                         .orderItems(order.getOrderItems()
-                                .stream().map(this::mapOrderItem)
+                                .stream().map(mapperUtils::orderItemToOrderItemVO)
                                 .collect(Collectors.toList())).build()).collect(Collectors.toList());
     }
 
@@ -116,22 +129,5 @@ public class OrderServiceImpl implements OrderService {
         order.setOrderStatus(status);
         orderRepository.save(order);
         return "Order status updated";
-    }
-
-    private OrderItem mapCartItem(CartItem cartItem) {
-            OrderItem orderItem = new OrderItem();
-            orderItem.setQuotedPrice(cartItem.getQuotedPrice());
-            orderItem.setQuantityOrdered(cartItem.getQuantityOrdered());
-            orderItem.setProduct(cartItem.getProduct());
-
-            return orderItem;
-    }
-
-    private OrderItemVO mapOrderItem(OrderItem orderItem) {
-        return OrderItemVO.builder()
-                .productId(orderItem.getProduct().getProductNumber())
-                .productPrice(String.valueOf(orderItem.getQuotedPrice()))
-                .quantityOrdered(String.valueOf(orderItem.getQuantityOrdered()))
-                .build();
     }
 }

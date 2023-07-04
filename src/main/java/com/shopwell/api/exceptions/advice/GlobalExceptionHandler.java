@@ -7,6 +7,7 @@ import com.shopwell.api.model.VOs.response.ErrorMessageVO;
 import org.quartz.SchedulerException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -46,5 +47,23 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .build();
         return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(errorMessageVO);
+    }
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<?> schedulerException(UsernameNotFoundException exception) {
+        var errorMessageVO = ErrorMessageVO.builder()
+                .message(exception.getMessage())
+                .status(HttpStatus.BAD_REQUEST)
+                .build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessageVO);
+    }
+
+    @ExceptionHandler(NullPointerException.class)
+    public ResponseEntity<?> schedulerException(NullPointerException exception) {
+        var errorMessageVO = ErrorMessageVO.builder()
+                .message(exception.getMessage())
+                .status(HttpStatus.BAD_REQUEST)
+                .build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessageVO);
     }
 }

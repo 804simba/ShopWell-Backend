@@ -4,8 +4,18 @@ import com.shopwell.api.exceptions.ProductNotFoundException;
 import com.shopwell.api.model.VOs.request.ProductRegistrationVO;
 import com.shopwell.api.model.VOs.request.ProductSearchRequestVO;
 import com.shopwell.api.model.VOs.response.ApiResponseVO;
+import com.shopwell.api.model.VOs.response.CustomerResponseVO;
 import com.shopwell.api.model.VOs.response.ProductSearchResponseVO;
 import com.shopwell.api.service.ProductService;
+import com.shopwell.api.utils.PageUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,48 +28,107 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/products")
 @Slf4j
+@Tag(name = "Product")
+@SecurityRequirement(name = "Bearer Authentication")
 public final class ProductController {
 
     private final ProductService productService;
 
+    @Operation(
+            summary = "This is an endpoint for saving a product."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Product saved",
+                    content = { @Content(mediaType = "application/json") }),
+            @ApiResponse(responseCode = "400", description = "Invalid / malformed request"),
+            @ApiResponse(responseCode = "403", description = "Invalid / expired token"),
+            @ApiResponse(responseCode = "404", description = "Product not found", content = @Content)
+
+    })
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ApiResponseVO<?>> saveProduct(@Valid @ModelAttribute final ProductRegistrationVO registrationVO) {
+    public ResponseEntity<ApiResponseVO<?>> saveProduct(@Parameter(description = "Product to save") @Valid @ModelAttribute final ProductRegistrationVO registrationVO) {
         log.info("Saving product: " + registrationVO);
         ApiResponseVO<?> response = new ApiResponseVO<>(productService.saveProduct(registrationVO));
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    @Operation(
+            description = "Get endpoint for manager",
+            summary = "This is a summary for management GET endpoint",
+            responses = {
+                    @ApiResponse(description = "Product saved successfully", responseCode = "200"),
+                    @ApiResponse(description = "Unauthorized / Invalid token", responseCode = "403"),
+                    @ApiResponse(description = "Product not found", responseCode = "404")
+            }
+    )
     @PutMapping(value = "/{productId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ApiResponseVO<?>> editProduct(@PathVariable("productId") final Long productId, @ModelAttribute final ProductRegistrationVO registrationVO) throws ProductNotFoundException {
+    public ResponseEntity<ApiResponseVO<?>> editProduct(@Parameter(description = "Product to edit") @PathVariable("productId") final Long productId, @ModelAttribute final ProductRegistrationVO registrationVO) throws ProductNotFoundException {
         log.info("Editing product: " + registrationVO);
         ApiResponseVO<?> response = new ApiResponseVO<>(productService.editProduct(productId, registrationVO));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @Operation(
+            summary = "This is an endpoint for deleting a product.",
+            responses = {
+                    @ApiResponse(description = "Product deleted successfully", responseCode = "200"),
+                    @ApiResponse(description = "Unauthorized / Invalid token", responseCode = "403"),
+                    @ApiResponse(description = "Product not found", responseCode = "404")
+            }
+    )
     @DeleteMapping("/{productId}")
-    public ResponseEntity<ApiResponseVO<?>> deleteProduct(@PathVariable("productId") final Long productId) throws ProductNotFoundException {
+    public ResponseEntity<ApiResponseVO<?>> deleteProduct(@Parameter(description = "Product to delete") @PathVariable("productId") final Long productId) throws ProductNotFoundException {
         log.info("Deleting product with id: " + productId);
-        ApiResponseVO<?> response = new ApiResponseVO<>("null", productService.deleteProduct(productId));
+        ApiResponseVO<?> response = new ApiResponseVO<>(productService.deleteProduct(productId));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @Operation(
+            summary = "This is an endpoint for getting a product by ID.",
+            responses = {
+                    @ApiResponse(description = "Product found", responseCode = "200"),
+                    @ApiResponse(description = "Unauthorized / Invalid token", responseCode = "403"),
+                    @ApiResponse(description = "Product not found", responseCode = "404")
+            }
+    )
     @GetMapping("/{productId}")
-    public ResponseEntity<ApiResponseVO<?>> getProductById(@PathVariable("productId") final Long productId) throws ProductNotFoundException {
+    public ResponseEntity<ApiResponseVO<?>> getProductById(@Parameter(description = "Product to get by ID") @PathVariable("productId") final Long productId) throws ProductNotFoundException {
         log.info("Getting product with id: " + productId);
-        ApiResponseVO<?> response = new ApiResponseVO<>("null", productService.getProduct(productId));
+        ApiResponseVO<?> response = new ApiResponseVO<>(productService.getProduct(productId));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @Operation(
+            summary = "This is an endpoint for getting a page of products.",
+            responses = {
+                    @ApiResponse(description = "Products found", responseCode = "200"),
+                    @ApiResponse(description = "Unauthorized / Invalid token", responseCode = "403"),
+                    @ApiResponse(description = "Product not found", responseCode = "404")
+            }
+    )
     @GetMapping
-    public ResponseEntity<ApiResponseVO<?>> getProducts() {
+    public ResponseEntity<ApiResponseVO<?>> getProducts(@RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
+                                                        @RequestParam(name = "pageSize", defaultValue = "20") int pageSize) {
         log.info("Getting products");
-        ApiResponseVO<?> response = new ApiResponseVO<>("null", productService.getProducts());
+        ApiResponseVO<?> response = new ApiResponseVO<>(productService.getProducts(pageNumber, pageSize));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @Operation(
+            summary = "This is an endpoint for searching products."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Product saved",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ProductSearchResponseVO.class)) }),
+            @ApiResponse(responseCode = "400", description = "Invalid / malformed request"),
+            @ApiResponse(responseCode = "403", description = "Invalid / expired token"),
+            @ApiResponse(responseCode = "404", description = "Product not found", content = @Content)
+
+    })
     @GetMapping("/search")
     public ResponseEntity<ApiResponseVO<?>> searchProducts(@RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
-                                                           @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+                                                           @RequestParam(name = "pageSize", defaultValue = "20") int pageSize,
                                                            @RequestBody ProductSearchRequestVO productSearchRequestVO) {
         log.info("Searching for product: " + productSearchRequestVO);
         ApiResponseVO<ProductSearchResponseVO> response = productService.searchProductsByCriteria(pageNumber, pageSize, productSearchRequestVO);
