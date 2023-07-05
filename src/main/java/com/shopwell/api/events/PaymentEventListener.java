@@ -1,7 +1,7 @@
 package com.shopwell.api.events;
 
 import com.shopwell.api.model.entity.Customer;
-import com.shopwell.api.service.EmailService;
+import com.shopwell.api.services.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationListener;
 import org.springframework.lang.NonNull;

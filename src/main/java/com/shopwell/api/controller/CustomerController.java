@@ -4,7 +4,7 @@ import com.shopwell.api.model.VOs.request.CustomerEmailRequestVO;
 import com.shopwell.api.model.VOs.request.CustomerRegistrationVO;
 import com.shopwell.api.model.VOs.response.ApiResponseVO;
 import com.shopwell.api.model.VOs.response.CustomerResponseVO;
-import com.shopwell.api.service.CustomerService;
+import com.shopwell.api.services.CustomerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

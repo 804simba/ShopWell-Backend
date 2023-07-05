@@ -1,6 +1,6 @@
 package com.shopwell.api.model.seeder;
 
-import com.shopwell.api.service.BirthdayEmailService;
+import com.shopwell.api.services.BirthdayEmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;

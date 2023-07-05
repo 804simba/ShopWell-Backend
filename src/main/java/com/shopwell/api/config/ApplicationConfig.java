@@ -1,6 +1,8 @@
 package com.shopwell.api.config;
 
 
+import com.shopwell.api.model.entity.AdminUser;
+import com.shopwell.api.repository.AdminRepository;
 import com.shopwell.api.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -14,17 +16,29 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Optional;
+
 @Configuration
 @RequiredArgsConstructor
 public class ApplicationConfig {
 
   private final CustomerRepository customerRepository;
 
+  private final AdminRepository adminRepository;
+
   @Bean
   public UserDetailsService userDetailsService() {
-    return username -> customerRepository.findCustomerByCustomerEmail(username)
-        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    return username -> {
+      Optional<AdminUser> adminUser = adminRepository.findByAdminEmail(username);
+      if (adminUser.isPresent()) {
+        return adminUser.get();
+      }
+
+      return customerRepository.findCustomerByCustomerEmail(username)
+              .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    };
   }
+
   @Bean
   public AuthenticationProvider authenticationProvider() {
     DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();

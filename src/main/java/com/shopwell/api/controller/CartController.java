@@ -2,14 +2,10 @@ package com.shopwell.api.controller;
 
 import com.shopwell.api.exceptions.CustomerNotFoundException;
 import com.shopwell.api.model.VOs.request.AddToCartRequestVO;
-import com.shopwell.api.model.VOs.request.CartItemVO;
 import com.shopwell.api.model.VOs.request.RemoveFromCartRequest;
 import com.shopwell.api.model.VOs.response.ApiResponseVO;
 import com.shopwell.api.model.VOs.response.CartItemResponseVO;
-import com.shopwell.api.model.entity.Customer;
-import com.shopwell.api.service.CartService;
-import com.shopwell.api.service.ProductService;
-import com.shopwell.api.utils.UserUtils;
+import com.shopwell.api.services.CartService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -18,9 +14,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -29,6 +25,7 @@ import java.util.List;
 @Slf4j
 @Tag(name = "Cart")
 @SecurityRequirement(name = "Bearer Authentication")
+@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
 public class CartController {
 
     private final CartService cartService;

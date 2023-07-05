@@ -1,6 +1,10 @@
 package com.shopwell.api.security;
 
 
+import com.shopwell.api.model.entity.AdminUser;
+import com.shopwell.api.model.entity.Customer;
+import com.shopwell.api.utils.UserUtils;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,6 +21,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Component @RequiredArgsConstructor @Slf4j
 
@@ -35,7 +42,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String userEmail;
-        if (authHeader == null ||!authHeader.startsWith("Bearer ")) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -46,13 +53,23 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
             log.info("details {}",userDetails);
-//            boolean isTokenValid = tokenRepository.findByToken(jwt)
-//                    .map(t -> !t.isExpired() && !t.isRevoked())
-//                    .orElse(false);
-//            log.info("chekced {}",isTokenValid);
+
+            Claims claims = jwtService.extractAllClaims(jwt);
+            Set<?> roles = new HashSet<>();
+            if (claims.containsKey("roles")) {
+                roles = new HashSet<>(claims.get("roles", List.class));
+            }
+
+            Object user = null;
+            if (roles.contains("ROLE_ADMIN")) {
+                user = UserUtils.getAuthenticatedUser(AdminUser.class);
+            } else if (roles.contains("ROLE_USER")) {
+                user = UserUtils.getAuthenticatedUser(Customer.class);
+            }
+
             if (jwtService.isTokenValid(jwt, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,
+                        user,
                         null,
                         userDetails.getAuthorities()
                 );

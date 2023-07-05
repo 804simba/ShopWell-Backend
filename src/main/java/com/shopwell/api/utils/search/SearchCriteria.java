@@ -1,12 +1,14 @@
 package com.shopwell.api.utils.search;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class SearchCriteria {
 
     private String filterKey;
@@ -16,10 +18,4 @@ public class SearchCriteria {
     private String operation;
 
     private String dataOption;
-
-    public SearchCriteria(String filterKey, Object value, String operation) {
-        this.filterKey = filterKey;
-        this.value = value;
-        this.operation = operation;
-    }
 }

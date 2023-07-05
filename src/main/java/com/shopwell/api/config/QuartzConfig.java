@@ -1,6 +1,6 @@
 package com.shopwell.api.config;
 
-import com.shopwell.api.service.jobs.BirthdayEmailJob;
+import com.shopwell.api.services.jobs.BirthdayEmailJob;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import org.springframework.context.annotation.Bean;
