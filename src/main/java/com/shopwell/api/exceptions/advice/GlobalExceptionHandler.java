@@ -3,6 +3,7 @@ package com.shopwell.api.exceptions.advice;
 import com.shopwell.api.exceptions.ImageDeleteException;
 import com.shopwell.api.exceptions.ImageUploadException;
 import com.shopwell.api.exceptions.ProductNotFoundException;
+import com.shopwell.api.exceptions.ProductOutOfStockException;
 import com.shopwell.api.model.VOs.response.ErrorMessageVO;
 import org.quartz.SchedulerException;
 import org.springframework.http.HttpStatus;
@@ -60,6 +61,15 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<?> schedulerException(NullPointerException exception) {
+        var errorMessageVO = ErrorMessageVO.builder()
+                .message(exception.getMessage())
+                .status(HttpStatus.BAD_REQUEST)
+                .build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessageVO);
+    }
+
+    @ExceptionHandler(ProductOutOfStockException.class)
+    public ResponseEntity<?> schedulerException(ProductOutOfStockException exception) {
         var errorMessageVO = ErrorMessageVO.builder()
                 .message(exception.getMessage())
                 .status(HttpStatus.BAD_REQUEST)

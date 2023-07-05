@@ -1,6 +1,7 @@
 package com.shopwell.api.services.implementations;
 
 import com.shopwell.api.exceptions.CustomerNotFoundException;
+import com.shopwell.api.exceptions.ProductOutOfStockException;
 import com.shopwell.api.model.VOs.request.AddToCartRequestVO;
 import com.shopwell.api.model.VOs.response.CartItemResponseVO;
 import com.shopwell.api.model.entity.*;
@@ -44,20 +45,23 @@ public class CartServiceImpl implements CartService {
         Product product = productRepository.findById(addToCartRequestVO.getProductId())
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        Cart cart = getOrCreateCart(customer.getCustomerEmail());
-        CartItem cartItem = getCartItemByProductAndCart(product, cart);
+        if (product.getQuantityAvailable() >= addToCartRequestVO.getQuantity()) {
+            Cart cart = getOrCreateCart(customer.getCustomerEmail());
+            CartItem cartItem = getCartItemByProductAndCart(product, cart);
 
-        if (cartItem == null) {
-            cartItem = new CartItem();
-            cartItem.setProduct(product);
-            cartItem.setCart(cart);
-            cartItem.setQuotedPrice(BigDecimal.valueOf(product.getProductPrice()));
-            cartItem.setQuantityOrdered(addToCartRequestVO.getQuantity());
+            if (cartItem == null) {
+                cartItem = new CartItem();
+                cartItem.setProduct(product);
+                cartItem.setCart(cart);
+                cartItem.setQuotedPrice(BigDecimal.valueOf(product.getProductPrice()));
+                cartItem.setQuantityOrdered(addToCartRequestVO.getQuantity());
+            } else {
+                cartItem.setQuantityOrdered(cartItem.getQuantityOrdered() + addToCartRequestVO.getQuantity());
+            }
+            cartItemRepository.save(cartItem);
         } else {
-            cartItem.setQuantityOrdered(cartItem.getQuantityOrdered() + addToCartRequestVO.getQuantity());
+            throw new ProductOutOfStockException("Product is out of stock");
         }
-
-        cartItemRepository.save(cartItem);
         return "Product added to cart successfully";
     }
 

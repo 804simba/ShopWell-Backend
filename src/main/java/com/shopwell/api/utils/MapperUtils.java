@@ -24,7 +24,7 @@ public class MapperUtils {
 
     private final RoleRepository roleRepository;
 
-    public Product mapProductRegistrationVOToProduct(ProductRegistrationVO productRegistrationVO) {
+    public Product ProductRegistrationVOToProductEntity(ProductRegistrationVO productRegistrationVO) {
         Brand brand = getOrCreateBrand(productRegistrationVO.getBrandName());
 
         Category category = getOrCreateCategory(productRegistrationVO.getCategoryName());

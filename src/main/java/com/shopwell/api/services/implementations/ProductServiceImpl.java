@@ -48,14 +48,13 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public ApiResponseVO<?> saveProduct(ProductRegistrationVO productRegistrationVO) {
         try {
-            Product product = mapperUtils.mapProductRegistrationVOToProduct(productRegistrationVO);
+            Product product = mapperUtils.ProductRegistrationVOToProductEntity(productRegistrationVO);
 
             List<MultipartFile> imageFiles = productRegistrationVO.getImageFiles();
             var savedProduct = productRepository.save(product);
 
             List<String> imageURLs = saveProductImages(savedProduct, imageFiles);
             savedProduct.setProductImageURLs(mapperUtils.imageUrlsToProductImageEntity(imageURLs));
-            productRepository.save(savedProduct);
 
             return ApiResponseVO.builder()
                     .message("Product saved successfully")

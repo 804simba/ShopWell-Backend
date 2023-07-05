@@ -46,7 +46,7 @@ public class CustomerServiceImpl implements CustomerService {
 
         customer.setCustomerPassword(passwordEncoder.encode(registrationVO.getCustomerPassword()));
         Customer saveUser = customerRepository.save(customer);
-        publisher.publishEvent(new RegisterEvent(customer,otpService.generateOTP(customer)));
+        publisher.publishEvent(new RegisterEvent(customer, otpService.generateOTP(customer)));
 
         return ApiResponseVO.builder()
                 .message("Account created successfully")
