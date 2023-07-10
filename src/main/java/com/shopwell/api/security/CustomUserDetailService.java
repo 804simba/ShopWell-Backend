@@ -23,12 +23,12 @@ public class CustomUserDetailService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Optional<Customer> customer = customerRepository.findCustomerByCustomerEmail(email);
+        Optional<Customer> customer = customerRepository.findByEmail(email);
         if (customer.isPresent()) {
             return new User(customer.get().getUsername(), customer.get().getPassword(), new ArrayList<>());
         }
 
-        Optional<AdminUser> admin = adminRepository.findByAdminEmail(email);
+        Optional<AdminUser> admin = adminRepository.findByEmail(email);
         if (admin.isPresent()) {
             return new User(admin.get().getUsername(), admin.get().getPassword(), new ArrayList<>());
         }

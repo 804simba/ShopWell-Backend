@@ -29,8 +29,11 @@ import java.util.stream.Collectors;
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
+
     private final CartRepository cartRepository;
+
     private final CartService cartService;
+
     private final MapperUtils mapperUtils;
 
     @Override
@@ -60,7 +63,7 @@ public class OrderServiceImpl implements OrderService {
             order.setOrderStatus(OrderStatus.PENDING);
             order.setCustomer(customer);
 
-            Double totalCostOfGoods = cartService.calculateTotalPrice(customer.getCustomerEmail());
+            Double totalCostOfGoods = cartService.calculateTotalPrice(customer.getEmail());
 
             order.setOrderTotal(BigDecimal.valueOf(totalCostOfGoods));
 

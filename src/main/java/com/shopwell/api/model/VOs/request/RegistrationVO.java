@@ -12,43 +12,43 @@ import org.springframework.web.multipart.MultipartFile;
 @Data
 @AllArgsConstructor
 @Builder
-public class CustomerRegistrationVO {
+public class RegistrationVO {
     @NotNull
     @NotEmpty
     @Size(min = 5, max = 30)
-    private String customerFirstName;
+    private String firstName;
 
     @NotNull
     @NotEmpty
     @Size(min = 5, max = 30)
-    private String customerLastName;
+    private String lastName;
 
     @NotNull
     @NotEmpty(message = "Email address must not be empty")
     @Size(min = 5, max = 50)
     @Email(message = "Enter email address")
-    private String customerEmail;
+    private String email;
 
-    private String customerDateOfBirth;
+    private String dateOfBirth;
 
     @NotNull
     @NotEmpty(message = "Enter your mobile number")
     @Size(min = 11, max = 20, message = "Mobile number must be 11 to 15 characters long")
-    private String customerPhoneNumber;
+    private String phoneNumber;
 
     @NotNull
     @NotEmpty(message = "Enter your street address")
     @Size(min = 5, max = 50)
-    private String customerStreetAddress;
+    private String streetAddress;
 
     @NotNull
     @NotEmpty(message = "Enter your city")
     @Size(min = 5, max = 50)
-    private String customerCity;
+    private String city;
 
     @NotNull
     @NotEmpty(message = "Enter your password")
-    private String customerPassword;
+    private String password;
 
-    private MultipartFile customerImage;
+    private MultipartFile imageFile;
 }

@@ -1,7 +1,7 @@
 package com.shopwell.api.controller;
 
 import com.shopwell.api.model.VOs.request.CustomerEmailRequestVO;
-import com.shopwell.api.model.VOs.request.CustomerRegistrationVO;
+import com.shopwell.api.model.VOs.request.RegistrationVO;
 import com.shopwell.api.model.VOs.response.ApiResponseVO;
 import com.shopwell.api.model.VOs.response.CustomerResponseVO;
 import com.shopwell.api.services.CustomerService;
@@ -38,9 +38,9 @@ public class CustomerController {
             @ApiResponse(responseCode = "403", description = "Invalid / expired token"),
     })
     @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ApiResponseVO<String>> registerCustomer(@Validated @ModelAttribute CustomerRegistrationVO customerRegistrationVO) {
-        log.info("Registering Customer: " + customerRegistrationVO);
-        customerService.registerCustomer(customerRegistrationVO);
+    public ResponseEntity<ApiResponseVO<String>> registerCustomer(@Validated @ModelAttribute RegistrationVO registrationVO) {
+        log.info("Registering Customer: " + registrationVO);
+        customerService.registerCustomer(registrationVO);
 
         return ResponseEntity.ok(ApiResponseVO.<String>builder()
                 .message("Customer saved successfully")

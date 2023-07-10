@@ -5,14 +5,18 @@ import com.shopwell.api.exceptions.ImageUploadException;
 import com.shopwell.api.exceptions.ProductNotFoundException;
 import com.shopwell.api.exceptions.ProductOutOfStockException;
 import com.shopwell.api.model.VOs.response.ErrorMessageVO;
+import lombok.extern.slf4j.Slf4j;
 import org.quartz.SchedulerException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
     @ExceptionHandler(ProductNotFoundException.class)
     public ResponseEntity<?> productNotFound(ProductNotFoundException exception) {
@@ -75,5 +79,20 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .build();
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessageVO);
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotAcceptableException.class)
+    public ResponseEntity<String> handleHttpMediaTypeNotAcceptableException(HttpMediaTypeNotAcceptableException ex) {
+        // Log the exception if needed
+        ex.printStackTrace();
+        log.info(ex.getMessage());
+
+        // Custom error message
+        String errorMessage = "Invalid media type. Please provide an acceptable representation.";
+
+        // Return a ResponseEntity with the error message and 406 Not Acceptable status
+        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE)
+                .contentType(MediaType.TEXT_PLAIN)
+                .body(errorMessage);
     }
 }

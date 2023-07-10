@@ -5,7 +5,7 @@ import com.shopwell.api.model.VOs.response.ApiResponseVO;
 import com.shopwell.api.model.VOs.response.CustomerResponseVO;
 import com.shopwell.api.model.VOs.response.ResponseOTPVO;
 import com.shopwell.api.services.AuthService;
-import com.shopwell.api.services.OtpService;
+import com.shopwell.api.services.OTPService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Authentication")
 @SecurityRequirement(name = "Bearer Authentication")
 public class AuthenticationController {
-    private final OtpService otpService;
+    private final OTPService<?> otpService;
     private final AuthService authService;
 
     @Operation(

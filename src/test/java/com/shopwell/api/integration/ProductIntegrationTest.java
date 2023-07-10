@@ -174,13 +174,15 @@ public class ProductIntegrationTest {
     private UserDetails createMockAdmin() {
         RoleEntity roleEntity = roleRepository.findByRoleName("admin");
         // Create a mock user for testing
-        return AdminUser.builder()
-                .adminId(1L)
-                .adminFirstName("testadmin")
-                .adminEmail("admin@gmail.com")
-                .adminPassword("testpassword")
-                .role(roleEntity)
-                .build();
+        AdminUser admin = new AdminUser();
+        admin.setId(1L);
+        admin.setFirstName("test");
+        admin.setLastName("admin");
+        admin.setEmail("admin@gmail.com");
+        admin.setPassword("testpassword");
+        admin.setRole(roleEntity);
+
+        return admin;
     }
 
     private String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {

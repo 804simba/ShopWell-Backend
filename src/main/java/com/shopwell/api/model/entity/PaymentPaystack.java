@@ -22,7 +22,7 @@ public class PaymentPaystack extends BaseEntity {
     private Long paymentId;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name = "customer_id")
+    @JoinColumn(name = "user_id")
     private Customer customer;
 
     @Column(name = "reference")

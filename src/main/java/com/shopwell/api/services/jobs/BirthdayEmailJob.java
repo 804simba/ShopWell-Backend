@@ -24,9 +24,9 @@ public class BirthdayEmailJob implements Job {
                 .findCustomersByBirthDate(currentDate.getMonthValue(), currentDate.getDayOfMonth());
 
         customers.forEach(customer -> {
-            String customerEmail = customer.getCustomerEmail();
+            String customerEmail = customer.getEmail();
             String subject = "Happy birthday";
-            String text = String.format("Dear %s , \n\nWishing you a very happy birthday from all of us at ShopWell", customer.getCustomerFirstName());
+            String text = String.format("Dear %s , \n\nWishing you a very happy birthday from all of us at ShopWell", customer.getFirstName());
 
             emailService.sendEmail(customerEmail, subject, text);
         });

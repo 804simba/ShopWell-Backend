@@ -46,7 +46,7 @@ public class CartServiceImpl implements CartService {
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
         if (product.getQuantityAvailable() >= addToCartRequestVO.getQuantity()) {
-            Cart cart = getOrCreateCart(customer.getCustomerEmail());
+            Cart cart = getOrCreateCart(customer.getEmail());
             CartItem cartItem = getCartItemByProductAndCart(product, cart);
 
             if (cartItem == null) {
@@ -73,7 +73,7 @@ public class CartServiceImpl implements CartService {
             throw new CustomerNotFoundException("Customer not found");
         }
 
-        Cart cart = getOrCreateCart(customer.getCustomerEmail());
+        Cart cart = getOrCreateCart(customer.getEmail());
 
         Product foundProduct = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
@@ -93,7 +93,7 @@ public class CartServiceImpl implements CartService {
             throw new CustomerNotFoundException("Customer not found");
         }
 
-        Cart cart = getOrCreateCart(customer.getCustomerEmail());
+        Cart cart = getOrCreateCart(customer.getEmail());
         List<CartItem> cartItems = cart.getCartItems();
 
         return cartItems.stream()
@@ -123,10 +123,10 @@ public class CartServiceImpl implements CartService {
     }
 
     private Cart getOrCreateCart(String email) {
-        Customer foundCustomer = customerRepository.findCustomerByCustomerEmail(email)
+        Customer foundCustomer = customerRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
-        return cartRepository.findByCustomer_CustomerId(foundCustomer.getCustomerId())
+        return cartRepository.findByCustomerId(foundCustomer.getId())
                 .orElseGet(() -> {
                     Cart cart = new Cart();
                     cart.setCustomer(foundCustomer);

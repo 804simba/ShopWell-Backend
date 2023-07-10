@@ -17,7 +17,7 @@ public class PaymentEventListener implements ApplicationListener<PaymentEvent> {
         String reference = event.getReference();
         String amount = event.getAmount();
 
-        String email = customer.getCustomerEmail();
+        String email = customer.getEmail();
 
         String subject = "Payment Confirmation";
         String text = String.format("Your payment with reference: %s for amount: ₦%s was successful", reference, amount);
