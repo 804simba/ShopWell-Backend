@@ -1,7 +1,7 @@
 package com.shopwell.api.services;
 
 import com.shopwell.api.exceptions.CustomerNotFoundException;
-import com.shopwell.api.model.VOs.request.CustomerRegistrationVO;
+import com.shopwell.api.model.VOs.request.RegistrationVO;
 import com.shopwell.api.model.VOs.response.ApiResponseVO;
 import com.shopwell.api.model.VOs.response.CustomerResponseVO;
 import com.shopwell.api.model.entity.Customer;
@@ -9,7 +9,7 @@ import com.shopwell.api.model.entity.Customer;
 import java.util.List;
 
 public interface CustomerService {
-    ApiResponseVO<?> registerCustomer(CustomerRegistrationVO registrationVO);
+    ApiResponseVO<?> registerCustomer(RegistrationVO registrationVO);
 
     CustomerResponseVO findCustomerByEmail(String email) throws CustomerNotFoundException;
 

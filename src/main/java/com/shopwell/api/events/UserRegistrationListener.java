@@ -1,6 +1,6 @@
 package com.shopwell.api.events;
 
-import com.shopwell.api.model.entity.Customer;
+import com.shopwell.api.model.entity.BaseUser;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -13,25 +13,25 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class RegisterListener implements ApplicationListener<RegisterEvent> {
+public class UserRegistrationListener implements ApplicationListener<UserRegistrationEvent> {
     private final JavaMailSender javaMailSender;
     @Override
-    public void onApplicationEvent(RegisterEvent event) {
+    public void onApplicationEvent(UserRegistrationEvent event) {
         String otp = event.getOtp();
-        Customer customer = event.getCustomer();
-        String email = customer.getCustomerEmail();
+        BaseUser user = event.getUser();
+        String email = user.getEmail();
         otp_generator(email,otp);
     }
     @SneakyThrows
-    private void otp_generator(String customer,String otp){
+    private void otp_generator(String user,String otp){
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
 
         messageHelper.setFrom("temple.chiorlu@decagon.dev");
         messageHelper.setSubject("OTP Verification");
-        messageHelper.setTo(customer);
+        messageHelper.setTo(user);
         String mailContent = "<div style='width:100%; background:#f8f8f8;' >"
-                + "<p style='font-size: 18px;'>Hello, " + customer + "</p>"
+                + "<p style='font-size: 18px;'>Hello, " + user + "</p>"
                 + "<p style='font-size: 16px;'>"+ "Welcome to Shop Well </p>"
                 + "<p style='font-size: 16px;'>Thank you for registering with us.</p>"
                 + "<p style='font-size: 16px;'>Please enter your OTP below to complete your registration:</p>"
@@ -41,7 +41,6 @@ public class RegisterListener implements ApplicationListener<RegisterEvent> {
                 + "</div>";
         messageHelper.setText(mailContent,true);
         javaMailSender.send(mimeMessage);
-        log.info("OTP HAVE BEEN SENT TO {}" ,customer);
-
+        log.info("OTP HAVE BEEN SENT TO {}", user);
     }
 }

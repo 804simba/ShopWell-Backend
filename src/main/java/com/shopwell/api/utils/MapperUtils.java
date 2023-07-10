@@ -51,36 +51,36 @@ public class MapperUtils {
                 .build();
     }
 
-    public Customer customerVOToCustomerEntity(CustomerRegistrationVO customerRegistrationVO) {
+    public Customer customerVOToCustomerEntity(RegistrationVO registrationVO) {
         RoleEntity roleEntity = roleRepository.findByRoleName("user");
 
-        return Customer.builder()
-                .customerFirstName(customerRegistrationVO.getCustomerFirstName())
-                .customerLastName(customerRegistrationVO.getCustomerLastName())
-                .customerEmail(customerRegistrationVO.getCustomerEmail())
-                .customerPhoneNumber(customerRegistrationVO.getCustomerPhoneNumber())
-                .customerStatus(false)
-                .role(roleEntity)
-                .customerCity(customerRegistrationVO.getCustomerCity())
-                .customerDateOfBirth(DateUtils.getDate(customerRegistrationVO.getCustomerDateOfBirth()))
-                .customerStreetAddress(customerRegistrationVO.getCustomerStreetAddress())
-                .build();
+        Customer customer = new Customer();
+        customer.setFirstName(registrationVO.getFirstName());
+        customer.setEmail(registrationVO.getEmail());
+        customer.setPhoneNumber(registrationVO.getPhoneNumber());
+        customer.setStatus(false);
+        customer.setRole(roleEntity);
+        registrationVO.setCity(registrationVO.getCity());
+        registrationVO.setDateOfBirth(registrationVO.getDateOfBirth());
+        registrationVO.setStreetAddress(registrationVO.getStreetAddress());
+
+        return customer;
     }
 
     public AdminUser adminVOToAdminEntity(AdminRegistrationRequest adminRegistrationRequest) {
         RoleEntity roleEntity = roleRepository.findByRoleName("admin");
 
-        return AdminUser.builder()
-                .adminFirstName(adminRegistrationRequest.getAdminFirstName())
-                .adminLastName(adminRegistrationRequest.getAdminLastName())
-                .adminEmail(adminRegistrationRequest.getAdminEmail())
-                .adminPhoneNumber(adminRegistrationRequest.getAdminPhoneNumber())
-                .adminStatus(false)
-                .role(roleEntity)
-                .adminCity(adminRegistrationRequest.getAdminCity())
-                .adminDateOfBirth(DateUtils.getDate(adminRegistrationRequest.getAdminDateOfBirth()))
-                .adminStreetAddress(adminRegistrationRequest.getAdminStreetAddress())
-                .build();
+        AdminUser admin = new AdminUser();
+        admin.setFirstName(adminRegistrationRequest.getFirstName());
+        admin.setEmail(adminRegistrationRequest.getEmail());
+        admin.setPhoneNumber(adminRegistrationRequest.getPhoneNumber());
+        admin.setStatus(false);
+        admin.setRole(roleEntity);
+        adminRegistrationRequest.setCity(adminRegistrationRequest.getCity());
+        adminRegistrationRequest.setDateOfBirth(adminRegistrationRequest.getDateOfBirth());
+        adminRegistrationRequest.setStreetAddress(adminRegistrationRequest.getStreetAddress());
+
+        return admin;
     }
 
     public List<ProductImage> imageUrlsToProductImageEntity(List<String> imageURLs) {
@@ -108,9 +108,9 @@ public class MapperUtils {
 
     public CustomerResponseVO customerEntityToCustomerResponseVO(Customer customer) {
         return CustomerResponseVO.builder()
-                .firstName(customer.getCustomerFirstName())
-                .lastName(customer.getCustomerLastName())
-                .emailAddress(customer.getCustomerEmail())
+                .firstName(customer.getFirstName())
+                .lastName(customer.getLastName())
+                .emailAddress(customer.getEmail())
                 .build();
     }
 

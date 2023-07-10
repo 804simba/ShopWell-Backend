@@ -29,12 +29,12 @@ public class ApplicationConfig {
   @Bean
   public UserDetailsService userDetailsService() {
     return username -> {
-      Optional<AdminUser> adminUser = adminRepository.findByAdminEmail(username);
+      Optional<AdminUser> adminUser = adminRepository.findByEmail(username);
       if (adminUser.isPresent()) {
         return adminUser.get();
       }
 
-      return customerRepository.findCustomerByCustomerEmail(username)
+      return customerRepository.findByEmail(username)
               .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     };
   }
@@ -47,6 +47,7 @@ public class ApplicationConfig {
 
     return authProvider;
   }
+
   @Bean
   public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
     return config.getAuthenticationManager();

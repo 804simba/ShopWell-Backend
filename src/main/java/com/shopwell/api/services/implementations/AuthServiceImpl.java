@@ -27,30 +27,30 @@ public class AuthServiceImpl implements AuthService {
     public CustomerResponseVO authenticate(CustomerLoginRequestVO customerLoginRequestVO) {
 
         Customer user =findEmail(customerLoginRequestVO.getEmail());
-        if(user.getCustomerStatus()) {
+        if(user.getStatus()) {
             if (!passwordEncoder.matches(customerLoginRequestVO.getPassword(), user.getPassword())) {
                 throw new InvalidCredentialsException("Invalid Password");
             }
             String jwt = jwtService.generateToken(user);
             String refresh = jwtService.generateRefreshToken(user);
             Authentication authentication = new UsernamePasswordAuthenticationToken(
-                    user.getCustomerEmail(),user.getPassword());
+                    user.getEmail(),user.getPassword());
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
             return CustomerResponseVO.builder()
-                    .emailAddress(user.getCustomerEmail())
+                    .emailAddress(user.getEmail())
                     .object("Token " +jwt + " || Refresh :"+refresh)
-                    .firstName(user.getCustomerFirstName())
-                    .lastName(user.getCustomerLastName())
+                    .firstName(user.getFirstName())
+                    .lastName(user.getLastName())
                     .build();
         }else{
             return CustomerResponseVO.builder()
-                    .emailAddress(user.getCustomerEmail())
+                    .emailAddress(user.getEmail())
                     .object("ERROR")
                     .build();
         }
     }
     private Customer findEmail(String email){
-        return customerRepository.findCustomerByCustomerEmail(email).orElseThrow(()-> new RuntimeException("USER NOT FOUND"));
+        return customerRepository.findByEmail(email).orElseThrow(()-> new RuntimeException("USER NOT FOUND"));
     }
 }

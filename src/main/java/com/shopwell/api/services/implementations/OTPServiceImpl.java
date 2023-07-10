@@ -1,14 +1,18 @@
 package com.shopwell.api.services.implementations;
 
-import com.shopwell.api.events.RegisterEvent;
-import com.shopwell.api.exceptions.CustomerNotFoundException;
+import com.shopwell.api.events.UserRegistrationEvent;
+import com.shopwell.api.exceptions.OTPException;
 import com.shopwell.api.model.VOs.response.ResponseOTPVO;
+import com.shopwell.api.model.entity.AdminUser;
+import com.shopwell.api.model.entity.BaseUser;
 import com.shopwell.api.model.entity.Customer;
-import com.shopwell.api.model.entity.OTPConfirmation;
+import com.shopwell.api.model.entity.OTP;
+import com.shopwell.api.repository.AdminRepository;
 import com.shopwell.api.repository.CustomerRepository;
 import com.shopwell.api.repository.OTPRepository;
 import com.shopwell.api.services.OTPService;
 import com.shopwell.api.utils.RandomValues;
+import com.shopwell.api.utils.VerifyUserUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -21,34 +25,36 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class CustomerOTPServiceImpl implements OTPService<Customer> {
+public class OTPServiceImpl<T extends BaseUser> implements OTPService<T> {
     private final OTPRepository otpRepository;
     private final CustomerRepository customerRepository;
+    private final AdminRepository adminRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final VerifyUserUtil verifyUserUtil;
 
-    @Override
-    public String generateOTP(Customer customer)  {
-        String otp = RandomValues.generateRandom();
-        OTPConfirmation confirmationToken = new OTPConfirmation(otp, customer);
-        sendOtp(customer,otp,confirmationToken);
-        return otp;
-    }
+
+
 
     @Override
     @SneakyThrows
     public ResponseOTPVO verifyUserOtp(String email, String otp) {
-        Customer customer = customerRepository.findCustomerByCustomerEmail(email)
-                .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
+        BaseUser user = verifyUserUtil.verifyIfCustomerOrAdminEmail(email);
 
-        log.info("Verifying OTP:: " + customer);
-        OTPConfirmation otpConfirmation = otpRepository.findByCustomerAndOtp_generator(customer.getId(), otp);
+        log.info("Verifying OTP:: " + user.getEmail());
+        OTP otpConfirmation = otpRepository.findByUserIdAndOtp(user.getId(), otp);
         System.out.println(otpConfirmation);
+
         if (otpConfirmation != null && !isOtpExpired(otpConfirmation)) {
-            System.out.println(otpConfirmation.getCustomer());
-            otpConfirmation.getCustomer().setStatus(true);
-            customerRepository.save(otpConfirmation.getCustomer());
+            System.out.println(otpConfirmation.getUser());
+            user.setStatus(true);
+            if (user instanceof Customer customer) {
+                customerRepository.save(customer);
+            } else {
+                AdminUser admin = (AdminUser) user;
+                adminRepository.save(admin);
+            }
             return ResponseOTPVO.builder()
-                    .message(otpConfirmation.getCustomer().getEmail())
+                    .message(user.getEmail())
                     .localDateTime(LocalDateTime.now())
                     .build();
         } else {
@@ -58,40 +64,60 @@ public class CustomerOTPServiceImpl implements OTPService<Customer> {
                     .build();
         }
     }
-    public void sendOtp(Customer customer,String otp,OTPConfirmation confirmationToken){
-        System.out.println("****");
-        OTPConfirmation otpConfirmation = otpRepository.findId(customer.getId());
-        System.out.println("-----");
-        if (otpConfirmation != null){
-            otpRepository.delete(otpConfirmation);
+    public void sendOtp(BaseUser user, String otp, OTP newOTP){
+        OTP foundOTP = otpRepository.findByUserId(user.getId());
+
+        if (foundOTP != null){
+            otpRepository.delete(foundOTP);
         }
-        otpRepository.save(confirmationToken);
+        otpRepository.save(newOTP);
         System.out.println(otp);
-        applicationEventPublisher.publishEvent(new RegisterEvent(customer,otp));
+        applicationEventPublisher.publishEvent(new UserRegistrationEvent(user, otp));
     }
 
     @Override
     public ResponseOTPVO resendOtp(String email) {
-        Customer customer = customerRepository.findCustomerByCustomerEmail(email).orElseThrow(()->new RuntimeException("USER NOT FOUND"));
-        String otp = RandomValues.generateRandom();
-        OTPConfirmation confirmationToken = new OTPConfirmation(otp, customer);
-        sendOtp(customer,otp,confirmationToken);
-        return ResponseOTPVO.builder()
-                .message(otp)
-                .localDateTime(LocalDateTime.now())
-                .build();
+        BaseUser user;
+        try {
+            user = verifyUserUtil.verifyIfCustomerOrAdminEmail(email);
 
+            String generatedOTP = RandomValues.generateRandom();
+            OTP newOTP = generateOTP(user);
+
+            sendOtp(user, generatedOTP, newOTP);
+            return ResponseOTPVO.builder()
+                    .message(generatedOTP)
+                    .localDateTime(LocalDateTime.now())
+                    .build();
+        } catch (Exception e) {
+            log.info("Error resending OTP: {}", e.getMessage());
+            throw new OTPException("Error resending OTP");
+        }
     }
-    private boolean isOtpExpired(OTPConfirmation otpConfirmation) {
-        LocalDateTime otpCreationTime = otpConfirmation.getExpiresAt();
+    private boolean isOtpExpired(OTP otp) {
+        LocalDateTime otpCreationTime = otp.getExpiresAt();
         LocalDateTime currentDateTime = LocalDateTime.now();
         Duration duration = Duration.between(otpCreationTime, currentDateTime);
         long minutesPassed = duration.toMinutes();
         System.out.println(minutesPassed);
-
         long otpExpirationMinutes = 4;
-
         return minutesPassed > otpExpirationMinutes;
     }
 
+    @Override
+    public OTP generateOTP(BaseUser user)  {
+        String otp = RandomValues.generateRandom();
+
+        OTP otpEntity;
+
+        if (user instanceof Customer customer) {
+            otpEntity = new OTP(otp, customer);
+        } else if (user instanceof AdminUser adminUser) {
+            otpEntity = new OTP(otp, adminUser);
+        } else {
+            throw new IllegalArgumentException("Invalid user type");
+        }
+
+        return otpEntity;
+    }
 }
