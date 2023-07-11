@@ -22,7 +22,7 @@ public class Cart {
     @Column(name = "cart_id")
     private Long cartId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "user_id")
     private Customer customer;
 

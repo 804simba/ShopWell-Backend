@@ -10,9 +10,7 @@ import com.shopwell.api.model.entity.OTP;
 import com.shopwell.api.repository.CustomerRepository;
 import com.shopwell.api.services.CustomerService;
 import com.shopwell.api.services.OTPService;
-import com.shopwell.api.services.image.UserImageService;
 import com.shopwell.api.utils.MapperUtils;
-import com.shopwell.api.utils.UserUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -20,7 +18,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Random;
 
 @RequiredArgsConstructor
 @Service
@@ -36,37 +33,24 @@ public class CustomerServiceImpl implements CustomerService {
 
     private final MapperUtils mapperUtils;
 
-    private final UserImageService userImageService;
-
 
     @Override
     public ApiResponseVO<?> registerCustomer(RegistrationVO registrationVO) {
-        Customer customer = (Customer) mapperUtils.customerVOToCustomerEntity(registrationVO);
-        try {
-            if (!registrationVO.getImageFile().isEmpty()) {
-                Random random = new Random();
-                Long imageId = random.nextLong(9000) + 1000;
+        Customer customer = mapperUtils.customerVOToCustomerEntity(registrationVO);
 
-                String imageURL = userImageService.uploadImage(imageId, registrationVO.getImageFile());
-                customer.setImageURL(imageURL);
-            } else {
-                customer.setImageURL(UserUtils.IMAGE_PLACEHOLDER_URL);
-            }
+        customer.setPassword(passwordEncoder.encode(registrationVO.getPassword()));
+        Customer saveUser = customerRepository.save(customer);
 
-            customer.setPassword(passwordEncoder.encode(registrationVO.getPassword()));
-            Customer saveUser = customerRepository.save(customer);
-            OTP otpEntity = otpService.generateOTP(customer);
-            String otp = otpEntity.getOtp();
-            publisher.publishEvent(new UserRegistrationEvent(customer, otp));
+        OTP otpEntity = otpService.generateOTP(customer);
+        otpEntity.setUser(customer);
+        otpService.saveOTP(otpEntity);
 
-            return ApiResponseVO.builder()
-                    .message("Account created successfully")
-                    .payload(mapperUtils.customerEntityToCustomerResponseVO(saveUser)).build();
+        String otp = otpEntity.getOtp();
+        publisher.publishEvent(new UserRegistrationEvent(customer, otp));
 
-        } catch (Exception e) {
-            log.info("Failed to upload customer image: {}", e.getMessage());
-            return ApiResponseVO.<String>builder().message("Failed to upload customer image").build();
-        }
+        return ApiResponseVO.builder()
+                .message("Account created successfully")
+                .payload(mapperUtils.customerEntityToCustomerResponseVO(saveUser)).build();
     }
 
     @Override

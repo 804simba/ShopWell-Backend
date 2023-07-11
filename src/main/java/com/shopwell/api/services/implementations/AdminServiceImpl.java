@@ -10,6 +10,7 @@ import com.shopwell.api.services.AdminService;
 import com.shopwell.api.services.OTPService;
 import com.shopwell.api.utils.MapperUtils;
 import com.shopwell.api.utils.UserUtils;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -34,13 +35,16 @@ public class AdminServiceImpl implements AdminService {
     private final OTPService<AdminUser> otpService;
 
     @Override
+    @Transactional(rollbackOn = Exception.class)
     public ApiResponseVO<String> registerAdmin(AdminRegistrationRequest adminRegistrationRequest) {
-        AdminUser admin = (AdminUser) mapperUtils.adminVOToAdminEntity(adminRegistrationRequest);
+        AdminUser admin = mapperUtils.adminVOToAdminEntity(adminRegistrationRequest);
         admin.setPassword(passwordEncoder.encode(adminRegistrationRequest.getPassword()));
         admin.setImageURL(UserUtils.IMAGE_PLACEHOLDER_URL);
         adminRepository.save(admin);
 
         OTP otpEntity = otpService.generateOTP(admin);
+        otpEntity.setUser(admin);
+        otpService.saveOTP(otpEntity);
         String otp = otpEntity.getOtp();
         publisher.publishEvent(new UserRegistrationEvent(admin, otp));
 

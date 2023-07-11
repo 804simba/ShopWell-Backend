@@ -1,5 +1,8 @@
 package com.shopwell.api.model.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum OrderStatus {
 
     PENDING("Pending"),
@@ -16,9 +19,5 @@ public enum OrderStatus {
 
     OrderStatus(String status) {
         this.status = status;
-    }
-
-    String getOrderStatus() {
-        return status;
     }
 }

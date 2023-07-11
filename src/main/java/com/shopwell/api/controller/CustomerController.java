@@ -19,6 +19,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
+
 @RestController
 @Slf4j
 @RequiredArgsConstructor
@@ -33,17 +35,18 @@ public class CustomerController {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Customer registered",
-            content = { @Content(mediaType = "multipart/form-data")}),
+            content = { @Content(mediaType = "application/json")}),
             @ApiResponse(responseCode = "401", description = "Invalid / malformed request"),
             @ApiResponse(responseCode = "403", description = "Invalid / expired token"),
     })
-    @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ApiResponseVO<String>> registerCustomer(@Validated @ModelAttribute RegistrationVO registrationVO) {
+    @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ApiResponseVO<String>> registerCustomer(@RequestBody RegistrationVO registrationVO) {
         log.info("Registering Customer: " + registrationVO);
-        customerService.registerCustomer(registrationVO);
+        var customer = customerService.registerCustomer(registrationVO);
 
         return ResponseEntity.ok(ApiResponseVO.<String>builder()
                 .message("Customer saved successfully")
+                .time(String.valueOf(Instant.now())).payload(customer.getPayload().toString())
                 .build());
     }
 

@@ -57,19 +57,12 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             Claims claims = jwtService.extractAllClaims(jwt);
             Set<?> roles = new HashSet<>();
             if (claims.containsKey("roles")) {
-                roles = new HashSet<>(claims.get("roles", List.class));
-            }
-
-            Object user = null;
-            if (roles.contains("ROLE_ADMIN")) {
-                user = UserUtils.getAuthenticatedUser(AdminUser.class);
-            } else if (roles.contains("ROLE_USER")) {
-                user = UserUtils.getAuthenticatedUser(Customer.class);
+                roles.addAll(claims.get("roles", List.class));
             }
 
             if (jwtService.isTokenValid(jwt, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        user,
+                        userDetails,
                         null,
                         userDetails.getAuthorities()
                 );

@@ -1,6 +1,5 @@
 package com.shopwell.api.model.entity;
 
-import com.shopwell.api.model.enums.PricingPlanType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -13,9 +12,9 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "paystack_payment")
+@Table(name = "paystack_detail")
 @EntityListeners(AuditingEntityListener.class)
-public class PaymentPaystack extends BaseEntity {
+public class PaymentDetail extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -48,8 +47,4 @@ public class PaymentPaystack extends BaseEntity {
 
     @Column(name = "ip_address")
     private String ipAddress;
-
-    @Column(name = "pricing_plan_type", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private PricingPlanType pricingPlanType = PricingPlanType.BASIC;
 }

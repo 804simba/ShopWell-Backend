@@ -12,6 +12,7 @@ import com.shopwell.api.services.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.sql.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -56,13 +57,14 @@ public class MapperUtils {
 
         Customer customer = new Customer();
         customer.setFirstName(registrationVO.getFirstName());
+        customer.setLastName(registrationVO.getLastName());
         customer.setEmail(registrationVO.getEmail());
         customer.setPhoneNumber(registrationVO.getPhoneNumber());
         customer.setStatus(false);
         customer.setRole(roleEntity);
-        registrationVO.setCity(registrationVO.getCity());
-        registrationVO.setDateOfBirth(registrationVO.getDateOfBirth());
-        registrationVO.setStreetAddress(registrationVO.getStreetAddress());
+        customer.setCity(registrationVO.getCity());
+        customer.setDateOfBirth(Date.valueOf(registrationVO.getDateOfBirth()));
+        customer.setStreetAddress(registrationVO.getStreetAddress());
 
         return customer;
     }
@@ -72,13 +74,14 @@ public class MapperUtils {
 
         AdminUser admin = new AdminUser();
         admin.setFirstName(adminRegistrationRequest.getFirstName());
+        admin.setLastName(adminRegistrationRequest.getLastName());
         admin.setEmail(adminRegistrationRequest.getEmail());
         admin.setPhoneNumber(adminRegistrationRequest.getPhoneNumber());
         admin.setStatus(false);
         admin.setRole(roleEntity);
-        adminRegistrationRequest.setCity(adminRegistrationRequest.getCity());
-        adminRegistrationRequest.setDateOfBirth(adminRegistrationRequest.getDateOfBirth());
-        adminRegistrationRequest.setStreetAddress(adminRegistrationRequest.getStreetAddress());
+        admin.setCity(adminRegistrationRequest.getCity());
+        admin.setStreetAddress(adminRegistrationRequest.getStreetAddress());
+        admin.setDateOfBirth(Date.valueOf(adminRegistrationRequest.getDateOfBirth()));
 
         return admin;
     }
