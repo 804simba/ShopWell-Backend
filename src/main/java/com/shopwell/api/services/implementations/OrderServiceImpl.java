@@ -37,6 +37,11 @@ public class OrderServiceImpl implements OrderService {
     private final MapperUtils mapperUtils;
 
     @Override
+    public Order findByOrderId(Long orderId) {
+        return orderRepository.findByOrderId(orderId);
+    }
+
+    @Override
     public OrderResponseVO placeOrder(OrderRequestVO orderRequestVO) {
         try {
             Customer customer = UserUtils.getAuthenticatedUser(Customer.class);

@@ -1,5 +1,6 @@
 package com.shopwell.api.utils;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -11,6 +12,6 @@ public class UserUtils {
         if (authentication != null && type.isAssignableFrom(authentication.getPrincipal().getClass())) {
             return type.cast(authentication.getPrincipal());
         }
-        return null;
+        throw new AccessDeniedException("Access denied");
     }
 }

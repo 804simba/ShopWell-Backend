@@ -5,6 +5,8 @@ import com.shopwell.api.model.entity.BaseUser;
 import com.shopwell.api.model.entity.OTP;
 
 public interface OTPService<T extends BaseUser> {
+    void saveOTP(OTP otp);
+
     ResponseOTPVO verifyUserOtp(String email, String otp);
 
     ResponseOTPVO resendOtp(String email);

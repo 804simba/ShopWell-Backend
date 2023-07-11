@@ -1,6 +1,6 @@
 package com.shopwell.api.controller;
 
-import com.shopwell.api.model.VOs.request.CustomerLoginRequestVO;
+import com.shopwell.api.model.VOs.request.LoginRequestVO;
 import com.shopwell.api.model.VOs.response.ApiResponseVO;
 import com.shopwell.api.model.VOs.response.CustomerResponseVO;
 import com.shopwell.api.model.VOs.response.ResponseOTPVO;
@@ -37,9 +37,9 @@ public class AuthenticationController {
     )
     @SneakyThrows
     @PostMapping("/authenticate")
-    public ResponseEntity<ApiResponseVO<CustomerResponseVO>> loginAuth(@RequestBody CustomerLoginRequestVO customerLoginRequestVO) {
-        log.info("Getting Customer by email: " + customerLoginRequestVO);
-        CustomerResponseVO customer = authService.authenticate(customerLoginRequestVO);
+    public ResponseEntity<ApiResponseVO<CustomerResponseVO>> loginAuth(@RequestBody LoginRequestVO loginRequestVO) {
+        log.info("Getting Customer by email: " + loginRequestVO);
+        CustomerResponseVO customer = authService.authenticate(loginRequestVO);
         ApiResponseVO<CustomerResponseVO> apiResponseVO =new ApiResponseVO<>(customer);
         return new ResponseEntity<>(apiResponseVO,HttpStatus.OK);
 

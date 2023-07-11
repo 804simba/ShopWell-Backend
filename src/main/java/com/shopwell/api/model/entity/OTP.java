@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name="otp_verification")
+@Table(name="otp_tbl")
 @Getter
 @Setter
 public class OTP {
@@ -25,7 +25,7 @@ public class OTP {
 
     @ManyToOne
     @JoinColumn(name = "user_id",nullable = false)
-    @JsonIgnoreProperties("otpConfirmations")
+    @JsonIgnoreProperties("otp")
     private BaseUser user;
 
     public OTP(String otp, BaseUser user) {

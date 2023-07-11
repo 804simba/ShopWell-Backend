@@ -26,14 +26,21 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @Slf4j
 public class OTPServiceImpl<T extends BaseUser> implements OTPService<T> {
+
     private final OTPRepository otpRepository;
+
     private final CustomerRepository customerRepository;
+
     private final AdminRepository adminRepository;
+
     private final ApplicationEventPublisher applicationEventPublisher;
+
     private final VerifyUserUtil verifyUserUtil;
 
-
-
+    @Override
+    public void saveOTP(OTP otp) {
+        otpRepository.save(otp);
+    }
 
     @Override
     @SneakyThrows
@@ -41,7 +48,7 @@ public class OTPServiceImpl<T extends BaseUser> implements OTPService<T> {
         BaseUser user = verifyUserUtil.verifyIfCustomerOrAdminEmail(email);
 
         log.info("Verifying OTP:: " + user.getEmail());
-        OTP otpConfirmation = otpRepository.findByUserIdAndOtp(user.getId(), otp);
+        OTP otpConfirmation = otpRepository.findByUser_EmailAndOtp(user.getEmail(), otp);
         System.out.println(otpConfirmation);
 
         if (otpConfirmation != null && !isOtpExpired(otpConfirmation)) {

@@ -3,14 +3,14 @@ package com.shopwell.api.services.implementations;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.shopwell.api.events.PaymentEvent;
-import com.shopwell.api.exceptions.CustomerNotFoundException;
-import com.shopwell.api.model.VOs.request.paymentDTOs.*;
+import com.shopwell.api.model.VOs.request.PaymentRequestVO;
+import com.shopwell.api.model.VOs.request.paymentDTOs.PaymentVerificationResponse;
+import com.shopwell.api.model.VOs.response.PaymentResponseVO;
 import com.shopwell.api.model.entity.Customer;
-import com.shopwell.api.model.entity.PaymentPaystack;
-import com.shopwell.api.model.enums.PricingPlanType;
-import com.shopwell.api.repository.CustomerRepository;
+import com.shopwell.api.model.entity.PaymentDetail;
 import com.shopwell.api.repository.PaystackPaymentRepository;
-import com.shopwell.api.services.PaystackService;
+import com.shopwell.api.services.PaymentService;
+import com.shopwell.api.utils.UserUtils;
 import com.shopwell.api.utils.constants.PaystackConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,11 +31,9 @@ import java.util.Objects;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class PaystackServiceImpl implements PaystackService {
+public class PaystackServiceImpl implements PaymentService {
 
     private final PaystackPaymentRepository paystackPaymentRepository;
-
-    private final CustomerRepository customerRepository;
 
     private final ApplicationEventPublisher eventPublisher;
 
@@ -43,65 +41,19 @@ public class PaystackServiceImpl implements PaystackService {
     private String paystackSecretKey;
 
     @Override
-    public CreatePlanResponse createPlan(final CreatePlanRequest createPlanRequest) {
-
-        CreatePlanResponse createPlanResponse = null;
-
-        try {
-            Gson gson = new Gson();
-
-            StringEntity postingString = new StringEntity(gson.toJson(createPlanRequest));
-
-            HttpClient client = HttpClientBuilder.create().build();
-
-            HttpPost post = new HttpPost(PaystackConstants.PAYSTACK_INIT);
-
-            post.setEntity(postingString);
-
-            post.addHeader("Content-Type", "application/json");
-
-            post.addHeader("Authorization", "Bearer " + paystackSecretKey);
-
-            StringBuilder result = new StringBuilder();
-
-            HttpResponse response = client.execute(post);
-
-            if (response.getStatusLine().getStatusCode() == PaystackConstants.STATUS_CODE_CREATED) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-
-                String line;
-
-                while ((line = reader.readLine()) != null) {
-                    result.append(line);
-                }
-            } else {
-                throw new Exception("Paystack failed to process payment at the moment");
-            }
-
-            ObjectMapper mapper = new ObjectMapper();
-            createPlanResponse = mapper.readValue(result.toString(), CreatePlanResponse.class);
-
-
-        } catch (Throwable ex) {
-            ex.printStackTrace();
-        }
-        return createPlanResponse;
-    }
-
-    @Override
-    public InitializePaymentResponse initializePayment(InitializePaymentRequest initializePaymentRequest) {
-        InitializePaymentResponse initializePaymentResponse = null;
+    public PaymentResponseVO initializePayment(PaymentRequestVO paymentRequestVO) throws Exception {
+        PaymentResponseVO paymentResponseVO = null;
 
         try {
             Gson gson = new Gson();
 
-            StringEntity postingString = new StringEntity(gson.toJson(initializePaymentRequest));
+            StringEntity postString = new StringEntity(gson.toJson(paymentRequestVO));
 
             HttpClient client = HttpClientBuilder.create().build();
 
             HttpPost post = new HttpPost(PaystackConstants.PAYSTACK_INIT_PAYMENT);
 
-            post.setEntity(postingString);
+            post.setEntity(postString);
 
             post.addHeader("Content-Type", "application/json");
 
@@ -110,7 +62,6 @@ public class PaystackServiceImpl implements PaystackService {
             StringBuilder result = new StringBuilder();
 
             HttpResponse response = client.execute(post);
-
             if (response.getStatusLine().getStatusCode() == PaystackConstants.STATUS_CODE_OK) {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 
@@ -122,24 +73,22 @@ public class PaystackServiceImpl implements PaystackService {
             } else {
                 throw new Exception("Paystack is unable to initialize payment now.");
             }
-
             ObjectMapper mapper = new ObjectMapper();
-            initializePaymentResponse = mapper.readValue(result.toString(), InitializePaymentResponse.class);
-        } catch (Throwable ex) {
-            ex.printStackTrace();
+            paymentResponseVO = mapper.readValue(result.toString(), PaymentResponseVO.class);
+        } catch (Exception e) {
+            log.error(e.getMessage());
         }
-
-        return initializePaymentResponse;
+        return paymentResponseVO;
     }
 
     @Override
-    public PaymentVerificationResponse paymentVerification(String reference, String plan, Long customerId) throws Exception {
-        if (reference.isEmpty() || plan.isEmpty()) {
-            throw new Exception("Reference, plan and id must be provided in path.");
+    public PaymentVerificationResponse paymentVerification(String reference) throws Exception {
+        if (reference.isEmpty()) {
+            throw new Exception("Reference must be provided in path.");
         }
 
         PaymentVerificationResponse paymentVerificationResponse;
-        PaymentPaystack paymentPaystack = null;
+        PaymentDetail paymentDetail = null;
         Customer customer = null;
 
         try {
@@ -174,11 +123,9 @@ public class PaystackServiceImpl implements PaystackService {
             if (paymentVerificationResponse == null || paymentVerificationResponse.getData().getStatus().equals("false")) {
                 throw new Exception("An error occurred while verifying payment from Paystack");
             } else if (paymentVerificationResponse.getData().getStatus().equals("success")) {
-                customer = customerRepository.findById(customerId).orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
+                customer = UserUtils.getAuthenticatedUser(Customer.class);
 
-                PricingPlanType pricingPlanType = PricingPlanType.valueOf(plan.toUpperCase());
-
-                paymentPaystack = PaymentPaystack.builder()
+                paymentDetail = PaymentDetail.builder()
                         .customer(customer)
                         .reference(paymentVerificationResponse.getData().getReference())
                         .amount(paymentVerificationResponse.getData().getAmount())
@@ -188,14 +135,13 @@ public class PaystackServiceImpl implements PaystackService {
                         .channel(paymentVerificationResponse.getData().getChannel())
                         .currency(paymentVerificationResponse.getData().getCurrency())
                         .ipAddress(paymentVerificationResponse.getData().getIpAddress())
-                        .pricingPlanType(pricingPlanType)
                         .build();
             }
         } catch (Exception e) {
             throw new Exception("Paystack Payment exception:" + e.getMessage());
         }
 
-        paystackPaymentRepository.save(Objects.requireNonNull(paymentPaystack));
+        paystackPaymentRepository.save(Objects.requireNonNull(paymentDetail));
 
         PaymentEvent paymentEvent = new PaymentEvent(
                 customer,
