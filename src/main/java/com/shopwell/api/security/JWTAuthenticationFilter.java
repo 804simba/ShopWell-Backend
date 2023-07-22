@@ -28,7 +28,9 @@ import java.util.Set;
 @Component @RequiredArgsConstructor @Slf4j
 
 public class JWTAuthenticationFilter extends OncePerRequestFilter {
+
     private final JwtService jwtService;
+
     private final UserDetailsService userDetailsService;
 
 
@@ -75,4 +77,3 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 }
-
