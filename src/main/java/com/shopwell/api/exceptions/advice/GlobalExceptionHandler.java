@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
 @Slf4j
+    // https://www.baeldung.com/spring-security-exceptionhandler
 public class GlobalExceptionHandler {
     @ExceptionHandler(ProductNotFoundException.class)
     public ResponseEntity<?> productNotFound(ProductNotFoundException exception) {
